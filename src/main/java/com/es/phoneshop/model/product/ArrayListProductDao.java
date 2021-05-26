@@ -26,8 +26,6 @@ public class ArrayListProductDao implements ProductDao {
         try {
             return products.stream()
                     .filter(product -> id.equals(product.getId()))
-                    .filter(product -> product.getPrice() != null)
-                    .filter(product -> product.getStock() > 0)
                     .findAny();
         } finally {
             lock.readLock().unlock();
@@ -51,8 +49,19 @@ public class ArrayListProductDao implements ProductDao {
     public void save(Product product) {
         lock.writeLock().lock();
         try {
-            product.setId(maxId++);
-            products.add(product);
+            if (product.getId() == null) {
+                product.setId(maxId++);
+                products.add(product);
+            } else {
+                Optional<Product> foundProduct = getProduct(product.getId());
+                if (foundProduct.isPresent()) {
+                    int index = products.indexOf(foundProduct.get());
+                    products.set(index, product);
+                } else {
+                    product.setId(maxId++);
+                    products.add(product);
+                }
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -72,7 +81,7 @@ public class ArrayListProductDao implements ProductDao {
 
     private void saveSampleProducts() {
         Currency usd = Currency.getInstance("USD");
-        save(new Product("sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
+        save(new Product("sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true"));
         save(new Product("sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 0, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg"));
         save(new Product("sgs3", "Samsung Galaxy S III", new BigDecimal(300), usd, 5, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20III.jpg"));
         save(new Product("iphone", "Apple iPhone", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone.jpg"));

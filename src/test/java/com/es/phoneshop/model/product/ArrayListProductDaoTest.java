@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.junit.Assert.*;
 
@@ -25,8 +24,6 @@ public class ArrayListProductDaoTest
         Long id = 0L;
         Optional<Product> product = productDao.getProduct(id);
         assertTrue(product.isPresent());
-        assertTrue(product.get().getPrice() != null);
-        assertTrue(product.get().getStock() > 0);
     }
 
     @Test
@@ -52,30 +49,27 @@ public class ArrayListProductDaoTest
         assertTrue(product.getId() > 0);
         Product result = productDao.getProduct(product.getId()).get();
         assertNotNull(result);
-        assertEquals(result.getCode(), "product");
-        assertEquals(result.getDescription(), "Samsung Galaxy S");
-        assertEquals(result.getPrice(), new BigDecimal(100));
-        assertEquals(result.getCurrency(), usd);
-        assertEquals(result.getStock(), 100);
-        assertEquals(result.getImageUrl(), "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        assertEquals("product", result.getCode());
+        assertEquals("Samsung Galaxy S", result.getDescription());
+        assertEquals(new BigDecimal(100), result.getPrice());
+        assertEquals(usd, result.getCurrency());
+        assertEquals(100, result.getStock());
+        assertEquals("https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg", result.getImageUrl());
     }
 
     @Test
-    public void testFindProductWithZeroStock() {
+    public void testSaveExistingProduct() {
+        int initialSize, sizeAfterFirstSave, sizeAfterSecondSave;
         Currency usd = Currency.getInstance("USD");
-        Product product = new Product("product", "Samsung Galaxy S", new BigDecimal(100), usd, 0, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        initialSize = productDao.findProducts().size();
+        Product product = new Product("product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
         productDao.save(product);
-        Optional<Product> result = productDao.getProduct(product.getId());
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testFindProductWithNullPrice() {
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product("product", "Samsung Galaxy S", null, usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        sizeAfterFirstSave = productDao.findProducts().size();
         productDao.save(product);
-        Optional<Product> result = productDao.getProduct(product.getId());
-        assertTrue(result.isEmpty());
+        sizeAfterSecondSave = productDao.findProducts().size();
+        assertTrue(productDao.findProducts().contains(product));
+        assertEquals(sizeAfterFirstSave, initialSize + 1);
+        assertEquals(sizeAfterFirstSave, sizeAfterSecondSave);
     }
 
     @Test
