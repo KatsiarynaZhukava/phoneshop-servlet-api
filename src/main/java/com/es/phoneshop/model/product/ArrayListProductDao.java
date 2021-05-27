@@ -14,6 +14,7 @@ public class ArrayListProductDao implements ProductDao {
     public long maxId;
     private List<Product> products;
     private ReentrantReadWriteLock lock;
+    private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
 
     public ArrayListProductDao() {
         lock = new ReentrantReadWriteLock();
@@ -55,10 +56,13 @@ public class ArrayListProductDao implements ProductDao {
                 product.setId(maxId++);
                 products.add(product);
             } else {
-                Product foundProduct = products.stream()
-                        .filter(streamProduct -> product.getId().equals(streamProduct.getId()))
-                        .findAny().orElseThrow(NotFoundException::new);
-                products.set(foundProduct.getId().intValue(), product);
+                Optional<Product> foundProduct = getProduct(product.getId());
+                if (foundProduct.isPresent()) {
+                    int index = products.indexOf(foundProduct.get());
+                    products.set(index, product);
+                } else {
+                    throw new NotFoundException(PRODUCT_NOT_FOUND_BY_ID, product.getId());
+                }
             }
         } finally {
             lock.writeLock().unlock();
