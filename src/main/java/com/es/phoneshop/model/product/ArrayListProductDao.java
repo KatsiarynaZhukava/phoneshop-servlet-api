@@ -1,5 +1,7 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.product.exception.NotFoundException;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -53,14 +55,10 @@ public class ArrayListProductDao implements ProductDao {
                 product.setId(maxId++);
                 products.add(product);
             } else {
-                Optional<Product> foundProduct = getProduct(product.getId());
-                if (foundProduct.isPresent()) {
-                    int index = products.indexOf(foundProduct.get());
-                    products.set(index, product);
-                } else {
-                    product.setId(maxId++);
-                    products.add(product);
-                }
+                Product foundProduct = products.stream()
+                        .filter(streamProduct -> product.getId().equals(streamProduct.getId()))
+                        .findAny().orElseThrow(NotFoundException::new);
+                products.set(foundProduct.getId().intValue(), product);
             }
         } finally {
             lock.writeLock().unlock();

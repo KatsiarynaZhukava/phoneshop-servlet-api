@@ -1,5 +1,6 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.product.exception.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,7 +59,7 @@ public class ArrayListProductDaoTest
     }
 
     @Test
-    public void testSaveExistingProduct() {
+    public void testSaveSameProductTwiceWithoutId() {
         int initialSize, sizeAfterFirstSave, sizeAfterSecondSave;
         Currency usd = Currency.getInstance("USD");
         initialSize = productDao.findProducts().size();
@@ -70,6 +71,22 @@ public class ArrayListProductDaoTest
         assertTrue(productDao.findProducts().contains(product));
         assertEquals(sizeAfterFirstSave, initialSize + 1);
         assertEquals(sizeAfterFirstSave, sizeAfterSecondSave);
+    }
+
+    @Test(expected = NotFoundException.class)
+    public void testSaveProductWithNonexistentId() {
+        Currency usd = Currency.getInstance("USD");
+        Product product = new Product(228L,"product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
+        productDao.save(product);
+    }
+
+    @Test
+    public void testSaveProductWithExistingId() {
+        Currency usd = Currency.getInstance("USD");
+        Product product = new Product(0L, "product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
+        productDao.save(product);
+        assertTrue(productDao.findProducts().contains(product));
+        assertEquals("product", productDao.findProducts().get(0).getCode());
     }
 
     @Test
