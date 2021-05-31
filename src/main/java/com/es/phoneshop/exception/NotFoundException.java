@@ -1,4 +1,4 @@
-package com.es.phoneshop.model.product.exception;
+package com.es.phoneshop.exception;
 
 import java.text.MessageFormat;
 
