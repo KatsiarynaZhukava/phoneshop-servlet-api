@@ -27,8 +27,7 @@ public class ProductListPageServlet extends HttpServlet {
         String query = request.getParameter("query");
         String sortField = request.getParameter("sort");
         String sortOrder = request.getParameter("order");
-        request.setAttribute("products",
-                                productDao.findProducts(query,
+        request.setAttribute("products", productDao.findProducts(query,
                                         Optional.ofNullable(sortField).map(String::toUpperCase).map(SortField::valueOf).orElse(null),
                                         Optional.ofNullable(sortOrder).map(String::toUpperCase).map(SortOrder::valueOf).orElse(null)
         ));
