@@ -1,5 +1,6 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.exception.NotFoundException;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
@@ -19,8 +20,17 @@ public class DemoDataServletContextListener implements ServletContextListener {
     }
 
     @Override
-    public void contextInitialized(ServletContextEvent servletContextEvent) {
-        getSampleProducts().stream().forEach(productDao::save);
+    public void contextInitialized(ServletContextEvent event) {
+        //getSampleProducts().stream().forEach(productDao::save);
+        if (Boolean.parseBoolean(event.getServletContext().getInitParameter("insertDemoData"))) {
+            for (Product product : getSampleProducts()) {
+                try {
+                    productDao.save(product);
+                } catch (NotFoundException e) {
+                    throw new RuntimeException("Failed to insert demo data", e);
+                }
+            }
+        }
     }
 
     @Override
