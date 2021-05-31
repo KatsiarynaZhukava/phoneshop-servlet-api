@@ -39,7 +39,7 @@
           </a>
         </td>
         <td class="price">
-          <a href='#' onclick='window.open("${pageContext.servletContext.contextPath}/price-history/${product.id}", "_blank", "height=300,width=450");' title='Pop Up'>
+          <a href='#' onclick='window.open("${pageContext.servletContext.contextPath}/price-history/${product.id}", "_blank", "height=300,width=350");'>
               <fmt:formatNumber value="${product.price}" type="currency" currencySymbol="${product.currency.symbol}"/>
           </a>
         </td>

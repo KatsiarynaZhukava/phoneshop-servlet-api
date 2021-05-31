@@ -66,55 +66,27 @@ public class Product {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
     public Currency getCurrency() {
         return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
     }
 
     public int getStock() {
         return stock;
     }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
     public HashMap<LocalDate, BigDecimal> getPriceHistory() {
         return priceHistory;
-    }
-
-    public void setPriceHistory(HashMap<LocalDate, BigDecimal> priceHistory) {
-        this.priceHistory = priceHistory;
     }
 }

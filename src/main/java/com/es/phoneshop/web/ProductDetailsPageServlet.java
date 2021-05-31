@@ -24,8 +24,13 @@ public class ProductDetailsPageServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String productId = request.getPathInfo();
-        request.setAttribute("product", productDao.getProduct(Long.valueOf(productId.substring(1)))
-                                                     .orElseThrow(NotFoundException.supplier( PRODUCT_NOT_FOUND_BY_ID, productId )));
-        request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
+        try {
+            request.setAttribute("product", productDao.getProduct(Long.valueOf(productId.substring(1)))
+                    .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId)));
+            request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
+        } catch (NotFoundException e) {
+            request.setAttribute("productId", productId.substring(1));
+            request.getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp").forward(request, response);
+        }
     }
 }
