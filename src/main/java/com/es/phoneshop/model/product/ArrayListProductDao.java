@@ -112,4 +112,10 @@ public class ArrayListProductDao implements ProductDao {
             lock.writeLock().unlock();
         }
     }
+
+    @Override
+    public void clear() {
+        products.clear();
+        maxId = 0L;
+    }
 }

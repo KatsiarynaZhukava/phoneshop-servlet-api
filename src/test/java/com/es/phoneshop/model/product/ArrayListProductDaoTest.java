@@ -2,20 +2,14 @@ package com.es.phoneshop.model.product;
 
 import com.es.phoneshop.exception.NotFoundException;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.Currency;
-import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ArrayListProductDaoTest
 {
     private ProductDao productDao;
@@ -24,13 +18,14 @@ public class ArrayListProductDaoTest
     public void setup() {
         productDao = ArrayListProductDao.getInstance();
         Currency usd = Currency.getInstance("USD");
-        if (productDao.findProducts(null, null, null).isEmpty()) {
-            productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
-            productDao.save(new Product(null, "sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
-            productDao.save(new Product(null, "sgs3", "Samsung Galaxy S III", new BigDecimal(300), usd, 5, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20III.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
-            productDao.save(new Product(null, "iphone", "Apple iPhone", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
-            productDao.save(new Product(null, "iphone6", "Apple iPhone 6", new BigDecimal(1000), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone%206.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
+        if (!productDao.findProducts(null, null, null).isEmpty()) {
+            productDao.clear();
         }
+        productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "sgs3", "Samsung Galaxy S III", new BigDecimal(300), usd, 5, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20III.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "iphone", "Apple iPhone", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "iphone6", "Apple iPhone 6", new BigDecimal(1000), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone%206.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
     }
 
     @Test
@@ -136,9 +131,10 @@ public class ArrayListProductDaoTest
     @Test
     public void testSaveProductWithExistingId() {
         Currency usd = Currency.getInstance("USD");
-        Product product = new Product(1L, "product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} );
+        Long code = 1L;
+        Product product = new Product(code, "product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} );
         productDao.save(product);
         assertTrue(productDao.findProducts(null, null, null).contains(product));
-        assertEquals("product", productDao.findProducts(null, null, null).get(0).getCode());
+        assertEquals("product", productDao.findProducts(null, null, null).get(code.intValue()).getCode());
     }
 }

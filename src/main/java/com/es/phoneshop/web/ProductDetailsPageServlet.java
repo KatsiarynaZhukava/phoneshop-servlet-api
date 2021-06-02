@@ -28,7 +28,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             request.setAttribute("product", productDao.getProduct(Long.valueOf(productId.substring(1)))
                     .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId)));
             request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | NumberFormatException e) {
             request.setAttribute("productId", productId.substring(1));
             request.getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp").forward(request, response);
         }

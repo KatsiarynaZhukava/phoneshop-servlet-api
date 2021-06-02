@@ -1,5 +1,6 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
 import org.junit.Before;
@@ -8,15 +9,17 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Currency;
+import java.util.HashMap;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,22 +36,41 @@ public class ProductDetailsPageServletTest {
     @Mock
     private ProductDao productDao;
 
-    private Product product;
-
-    private ProductDetailsPageServlet servlet = new ProductDetailsPageServlet();
+    private final ProductDetailsPageServlet servlet = new ProductDetailsPageServlet();
 
     @Before
     public void setup() throws ServletException {
-        product = new Product();
         servlet.init(config);
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+
+        productDao = ArrayListProductDao.getInstance();
+        productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), Currency.getInstance("USD"), 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
     }
 
     @Test
-    public void testDoGet() throws ServletException, IOException {
+    public void testDoGetWithCorrectId() throws ServletException, IOException {
+        when(request.getPathInfo()).thenReturn("/0");
+        servlet.doGet(request, response);
+        verify(request).setAttribute(eq("product"), any());
+        verify(request).getRequestDispatcher("/WEB-INF/pages/product.jsp");
+        verify(requestDispatcher).forward(request, response);
+    }
+
+    @Test
+    public void testDoGetWithIncorrectId() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/-1");
         servlet.doGet(request, response);
-        verify(request).setAttribute("-1", eq("productId"));
+        verify(request).setAttribute(eq("productId"), any());
+        verify(request).getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp");
+        verify(requestDispatcher).forward(request, response);
+    }
+
+    @Test
+    public void testDoGetWithIdNotANumber() throws ServletException, IOException {
+        when(request.getPathInfo()).thenReturn("/aaa");
+        servlet.doGet(request, response);
+        verify(request).setAttribute(eq("productId"), any());
+        verify(request).getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp");
         verify(requestDispatcher).forward(request, response);
     }
 }
