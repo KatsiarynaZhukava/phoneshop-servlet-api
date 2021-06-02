@@ -38,22 +38,6 @@ public class Product {
         this.priceHistory = priceHistory;
     }
 
-    public Product( final String code,
-                    final String description,
-                    final BigDecimal price,
-                    final Currency currency,
-                    final int stock,
-                    final String imageUrl,
-                    final HashMap<LocalDate, BigDecimal> priceHistory ) {
-        this.code = code;
-        this.description = description;
-        this.price = price;
-        this.currency = currency;
-        this.stock = stock;
-        this.imageUrl = imageUrl;
-        this.priceHistory = priceHistory;
-    }
-
     public Long getId() {
         return id;
     }
