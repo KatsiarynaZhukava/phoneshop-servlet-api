@@ -20,8 +20,8 @@
     <c:forEach var="pair" items="${product.priceHistory.entrySet()}">
       <tr>
         <td>
-          <fmt:parseDate value="${pair.getKey()}" pattern="yyyy-MM-dd" var="priceChangeDate" type="date"/>
-          <fmt:formatDate pattern="dd/MMM/yyyy" value="${priceChangeDate}"/>
+          <fmt:parseDate value="${ pair.getKey() }" pattern="yyyy-MM-dd'T'HH:mm" var="priceChangeDate" type="both" />
+          <fmt:formatDate pattern="dd.MM.yyyy HH:mm" value="${ priceChangeDate }" />
         </td>
         <td class="price">
           <fmt:formatNumber value="${pair.getValue()}" type="currency" currencySymbol="${product.currency.symbol}"/>

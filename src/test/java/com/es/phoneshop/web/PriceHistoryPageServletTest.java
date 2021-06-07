@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class PriceHistoryPageServletTest {
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
 
         productDao = ArrayListProductDao.getInstance();
-        productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), Currency.getInstance("USD"), 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDate, BigDecimal>(){{ put(LocalDate.of(2021, Calendar.JUNE, 30), new BigDecimal(200)); put(LocalDate.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), Currency.getInstance("USD"), 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
     }
 
     @Test
@@ -64,6 +64,7 @@ public class PriceHistoryPageServletTest {
         servlet.doGet(request, response);
         verify(request).setAttribute(eq("productId"), any());
         verify(request).getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp");
+        verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         verify(requestDispatcher).forward(request, response);
     }
 
@@ -73,6 +74,7 @@ public class PriceHistoryPageServletTest {
         servlet.doGet(request, response);
         verify(request).setAttribute(eq("productId"), any());
         verify(request).getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp");
+        verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         verify(requestDispatcher).forward(request, response);
     }
 }

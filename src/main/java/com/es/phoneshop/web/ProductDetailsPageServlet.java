@@ -29,6 +29,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
                     .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId)));
             request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
         } catch (NotFoundException | NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             request.setAttribute("productId", productId.substring(1));
             request.getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp").forward(request, response);
         }

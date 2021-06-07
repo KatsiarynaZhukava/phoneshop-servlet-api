@@ -1,7 +1,7 @@
 package com.es.phoneshop.model.product;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Currency;
 import java.util.HashMap;
 
@@ -15,7 +15,7 @@ public class Product {
     private Currency currency;
     private int stock;
     private String imageUrl;
-    private HashMap<LocalDate, BigDecimal> priceHistory;
+    private HashMap<LocalDateTime, BigDecimal> priceHistory;
 
     public Product() {
     }
@@ -27,7 +27,7 @@ public class Product {
                     final Currency currency,
                     final int stock,
                     final String imageUrl,
-                    final HashMap<LocalDate, BigDecimal> priceHistory ) {
+                    final HashMap<LocalDateTime, BigDecimal> priceHistory ) {
         this.id = id;
         this.code = code;
         this.description = description;
@@ -70,7 +70,18 @@ public class Product {
         return imageUrl;
     }
 
-    public HashMap<LocalDate, BigDecimal> getPriceHistory() {
+    public HashMap<LocalDateTime, BigDecimal> getPriceHistory() {
         return priceHistory;
+    }
+
+    public void setPriceHistory(HashMap<LocalDateTime, BigDecimal> priceHistory) {
+        this.priceHistory = priceHistory;
+    }
+
+    public void addToPriceHistory(LocalDateTime key, BigDecimal value) {
+        if (this.priceHistory == null) {
+           priceHistory = new HashMap<>();
+        }
+        priceHistory.put(key, value);
     }
 }

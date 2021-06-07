@@ -2,28 +2,34 @@ package com.es.phoneshop.model.product;
 
 import com.es.phoneshop.exception.NotFoundException;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
 public class ArrayListProductDao implements ProductDao {
     private static ProductDao instance;
     public long maxId;
     private List<Product> products;
-    private final ReentrantReadWriteLock lock;
+    private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
 
     private ArrayListProductDao() {
-        lock = new ReentrantReadWriteLock();
         products = new ArrayList<>();
     }
 
-    public static synchronized ProductDao getInstance() {
-        if (instance == null) {
-            instance = new ArrayListProductDao();
+    public static ProductDao getInstance() {
+        lock.readLock().lock();
+        try {
+            if (instance == null) {
+                instance = new ArrayListProductDao();
+            }
+            return instance;
+        } finally {
+            lock.readLock().unlock();
         }
-        return instance;
     }
 
     @Override
@@ -52,13 +58,13 @@ public class ArrayListProductDao implements ProductDao {
                 result = products;
             } else {
                 String[] keywords = query.toLowerCase().split("[ ]+");
-                ToIntFunction<Product> getNumberOfMatches = product ->
+                ToLongFunction<Product> getNumberOfMatches = product ->
                         (int) Arrays.stream(keywords)
                                     .filter(product.getDescription().toLowerCase()::contains)
                                     .count();
                 result = products.stream()
-                                 .filter(product -> (getNumberOfMatches.applyAsInt(product)) > 0)
-                                 .sorted(Comparator.comparingInt(getNumberOfMatches).reversed())
+                                 .filter(product -> (getNumberOfMatches.applyAsLong(product)) > 0)
+                                 .sorted(Comparator.comparingLong(getNumberOfMatches).reversed())
                                  .collect(Collectors.toList());
             }
             if (sortField != null) {
@@ -115,7 +121,34 @@ public class ArrayListProductDao implements ProductDao {
 
     @Override
     public void clear() {
-        products.clear();
-        maxId = 0L;
+        lock.writeLock().lock();
+        try {
+            products.clear();
+            maxId = 0L;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void createPriceHistory(Product product) {
+        lock.writeLock().lock();
+        try {
+            product.setPriceHistory(new HashMap<LocalDateTime, BigDecimal>(){{
+                put(LocalDateTime.now(), product.getPrice());
+            }});
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void addRecordToPriceHistory(Product product, LocalDateTime date, BigDecimal price) {
+        lock.writeLock().lock();
+        try {
+            product.addToPriceHistory(date, price);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 }
