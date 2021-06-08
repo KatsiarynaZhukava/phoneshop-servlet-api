@@ -1,7 +1,9 @@
 package com.es.phoneshop.model.product;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.HashMap;
 
 public class Product {
     private Long id;
@@ -13,6 +15,7 @@ public class Product {
     private Currency currency;
     private int stock;
     private String imageUrl;
+    private HashMap<LocalDateTime, BigDecimal> priceHistory;
 
     public Product() {
     }
@@ -23,7 +26,8 @@ public class Product {
                     final BigDecimal price,
                     final Currency currency,
                     final int stock,
-                    final String imageUrl ) {
+                    final String imageUrl,
+                    final HashMap<LocalDateTime, BigDecimal> priceHistory ) {
         this.id = id;
         this.code = code;
         this.description = description;
@@ -31,20 +35,7 @@ public class Product {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
-    }
-
-    public Product( final String code,
-                    final String description,
-                    final BigDecimal price,
-                    final Currency currency,
-                    final int stock,
-                    final String imageUrl ) {
-        this.code = code;
-        this.description = description;
-        this.price = price;
-        this.currency = currency;
-        this.stock = stock;
-        this.imageUrl = imageUrl;
+        this.priceHistory = priceHistory;
     }
 
     public Long getId() {
@@ -59,47 +50,38 @@ public class Product {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
     public Currency getCurrency() {
         return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
     }
 
     public int getStock() {
         return stock;
     }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public HashMap<LocalDateTime, BigDecimal> getPriceHistory() {
+        return priceHistory;
+    }
+
+    public void setPriceHistory(HashMap<LocalDateTime, BigDecimal> priceHistory) {
+        this.priceHistory = priceHistory;
+    }
+
+    public void addToPriceHistory(LocalDateTime key, BigDecimal value) {
+        if (this.priceHistory == null) {
+           priceHistory = new HashMap<>();
+        }
+        priceHistory.put(key, value);
     }
 }

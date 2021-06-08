@@ -1,13 +1,12 @@
 package com.es.phoneshop.model.product;
 
-import com.es.phoneshop.model.product.exception.NotFoundException;
+import com.es.phoneshop.exception.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.Currency;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -17,7 +16,16 @@ public class ArrayListProductDaoTest
 
     @Before
     public void setup() {
-        productDao = new ArrayListProductDao();
+        productDao = ArrayListProductDao.getInstance();
+        Currency usd = Currency.getInstance("USD");
+        if (!productDao.findProducts(null, null, null).isEmpty()) {
+            productDao.clear();
+        }
+        productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "sgs3", "Samsung Galaxy S III", new BigDecimal(300), usd, 5, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20III.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "iphone", "Apple iPhone", new BigDecimal(200), usd, 10, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
+        productDao.save(new Product(null, "iphone6", "Apple iPhone 6", new BigDecimal(1000), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Apple/Apple%20iPhone%206.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
     }
 
     @Test
@@ -35,16 +43,59 @@ public class ArrayListProductDaoTest
 
     @Test
     public void testFindProducts() {
-        List<Product> products = productDao.findProducts();
+        List<Product> products = productDao.findProducts(null, null, null);
         assertFalse(products.isEmpty());
         assertTrue(products.stream().allMatch(product -> product.getPrice() != null));
         assertTrue(products.stream().allMatch(product -> product.getStock() > 0));
     }
 
     @Test
+    public void testFindProductsWithOneWordQuery() {
+        List<Product> products = productDao.findProducts("iphone", null, null);
+        assertEquals(2, products.size());
+        assertEquals("Apple iPhone", products.get(0).getDescription());
+        assertEquals("Apple iPhone 6", products.get(1).getDescription());
+    }
+
+    @Test
+    public void testFindProductsWithComplexQuery() {
+        List<Product> products = productDao.findProducts("iphone 6", null, null);
+        assertEquals(2, products.size());
+        assertEquals("Apple iPhone 6", products.get(0).getDescription());
+        assertEquals("Apple iPhone", products.get(1).getDescription());
+    }
+
+    @Test
+    public void testFindProductsWithSortField() {
+        List<Product> products = productDao.findProducts(null, SortField.PRICE, SortOrder.ASC);
+        assertEquals("sgs", products.get(0).getCode());
+        assertEquals("sgs2", products.get(1).getCode());
+        assertEquals("iphone", products.get(2).getCode());
+        assertEquals("sgs3", products.get(3).getCode());
+        assertEquals("iphone6", products.get(4).getCode());
+    }
+
+    @Test
+    public void testFindProductsWithSortOrder() {
+        List<Product> products = productDao.findProducts(null, SortField.DESCRIPTION, SortOrder.DESC);
+        assertEquals("sgs3", products.get(0).getCode());
+        assertEquals("sgs2", products.get(1).getCode());
+        assertEquals("sgs", products.get(2).getCode());
+        assertEquals("iphone6", products.get(3).getCode());
+        assertEquals("iphone", products.get(4).getCode());
+    }
+
+    @Test
+    public void testRemoveExistingProduct() {
+        Long id = 0L;
+        productDao.delete(id);
+        assertFalse(productDao.getProduct(id).isPresent());
+    }
+
+    @Test
     public void testSaveProduct() {
         Currency usd = Currency.getInstance("USD");
-        Product product = new Product("product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        Product product = new Product(null, "product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} );
         productDao.save(product);
 
         assertTrue(product.getId() > 0);
@@ -61,38 +112,57 @@ public class ArrayListProductDaoTest
     @Test
     public void testSaveSameProductTwiceWithoutId() {
         int initialSize, sizeAfterFirstSave, sizeAfterSecondSave;
-        Currency usd = Currency.getInstance("USD");
-        initialSize = productDao.findProducts().size();
-        Product product = new Product("product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
+        initialSize = productDao.findProducts(null, null, null).size();
+        Product product = new Product(null, "product", "Palm Pixi", new BigDecimal(170), Currency.getInstance("USD"), 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30,10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} );
         productDao.save(product);
-        sizeAfterFirstSave = productDao.findProducts().size();
+        sizeAfterFirstSave = productDao.findProducts(null, null, null).size();
         productDao.save(product);
-        sizeAfterSecondSave = productDao.findProducts().size();
-        assertTrue(productDao.findProducts().contains(product));
+        sizeAfterSecondSave = productDao.findProducts(null, null, null).size();
+        assertTrue(productDao.findProducts(null, null, null).contains(product));
         assertEquals(sizeAfterFirstSave, initialSize + 1);
         assertEquals(sizeAfterFirstSave, sizeAfterSecondSave);
     }
 
     @Test(expected = NotFoundException.class)
     public void testSaveProductWithNonexistentId() {
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product(228L,"product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
+        Product product = new Product(228L,"product", "Palm Pixi", new BigDecimal(170), Currency.getInstance("USD"), 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} );
         productDao.save(product);
     }
 
     @Test
     public void testSaveProductWithExistingId() {
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product(0L, "product", "Palm Pixi", new BigDecimal(170), usd, 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg");
+        Long code = 1L;
+        Product product = new Product(code, "product", "Palm Pixi", new BigDecimal(170), Currency.getInstance("USD"), 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} );
         productDao.save(product);
-        assertTrue(productDao.findProducts().contains(product));
-        assertEquals("product", productDao.findProducts().get(0).getCode());
+        assertTrue(productDao.findProducts(null, null, null).contains(product));
+        assertEquals("product", productDao.findProducts(null, null, null).get(code.intValue()).getCode());
     }
 
     @Test
-    public void testDeleteExistingProduct() {
-        Long id = 0L;
-        productDao.delete(id);
-        assertFalse(productDao.getProduct(id).isPresent());
+    public void testCreatePriceHistory() {
+        Product product = new Product(null, "product", "Palm Pixi", new BigDecimal(170), Currency.getInstance("USD"), 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", null);
+        productDao.save(product);
+        productDao.createPriceHistory(product);
+        assertNotNull(productDao.getProduct(product.getId()).get().getPriceHistory());
+        assertFalse(productDao.getProduct(product.getId()).get().getPriceHistory().isEmpty());
+        assertTrue(productDao.getProduct(product.getId()).get().getPriceHistory().containsValue(product.getPrice()));
+    }
+
+    @Test
+    public void testAddRecordToNullPriceHistory() {
+        Product product = new Product(null, "product", "Palm Pixi", new BigDecimal(170), Currency.getInstance("USD"), 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", null);
+        productDao.save(product);
+        BigDecimal price = new BigDecimal(200);
+        productDao.addRecordToPriceHistory(product, LocalDateTime.now(), new BigDecimal(200));
+        assertTrue(productDao.getProduct(product.getId()).get().getPriceHistory().containsValue(price));
+    }
+
+    @Test
+    public void testAddRecordToNotNullPriceHistory() {
+        Product product = new Product(null, "product", "Palm Pixi", new BigDecimal(170), Currency.getInstance("USD"), 30, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Palm/Palm%20Pixi.jpg", new HashMap<>());
+        productDao.save(product);
+        BigDecimal price = new BigDecimal(200);
+        productDao.addRecordToPriceHistory(product, LocalDateTime.now(), price);
+        assertTrue(productDao.getProduct(product.getId()).get().getPriceHistory().containsValue(price));
     }
 }
