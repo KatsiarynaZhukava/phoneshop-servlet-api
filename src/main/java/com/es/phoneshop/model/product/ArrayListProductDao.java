@@ -10,7 +10,6 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
 public class ArrayListProductDao implements ProductDao {
-    private static ProductDao instance;
     public long maxId;
     private List<Product> products;
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
@@ -20,16 +19,11 @@ public class ArrayListProductDao implements ProductDao {
         products = new ArrayList<>();
     }
 
+    private static class InstanceHolder {
+        public static final ProductDao INSTANCE = new ArrayListProductDao();
+    }
     public static ProductDao getInstance() {
-        lock.readLock().lock();
-        try {
-            if (instance == null) {
-                instance = new ArrayListProductDao();
-            }
-            return instance;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return InstanceHolder.INSTANCE;
     }
 
     @Override
