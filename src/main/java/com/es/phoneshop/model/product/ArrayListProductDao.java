@@ -15,8 +15,6 @@ public class ArrayListProductDao implements ProductDao {
     public long maxId;
     private List<Product> products;
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
-
     private ArrayListProductDao() {
         products = new ArrayList<>();
     }
@@ -24,7 +22,6 @@ public class ArrayListProductDao implements ProductDao {
     private static class InstanceHolder {
         private static final ProductDao INSTANCE = new ArrayListProductDao();
     }
-
     public static ProductDao getInstance() {
         return InstanceHolder.INSTANCE;
     }

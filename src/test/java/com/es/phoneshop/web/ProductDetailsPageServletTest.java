@@ -26,6 +26,7 @@ import java.util.Locale;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class ProductDetailsPageServletTest {
     @Mock

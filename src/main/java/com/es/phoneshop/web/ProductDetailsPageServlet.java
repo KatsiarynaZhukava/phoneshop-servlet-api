@@ -28,7 +28,6 @@ public class ProductDetailsPageServlet extends HttpServlet {
     private CartService cartService;
     private RecentlyViewedService recentlyViewedService;
 
-
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);

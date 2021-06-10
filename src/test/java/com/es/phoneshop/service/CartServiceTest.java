@@ -3,8 +3,6 @@ package com.es.phoneshop.service;
 import com.es.phoneshop.exception.NotFoundException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.product.ArrayListProductDao;
-import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.util.DataManager;
 import org.junit.Before;
 import org.junit.Test;
