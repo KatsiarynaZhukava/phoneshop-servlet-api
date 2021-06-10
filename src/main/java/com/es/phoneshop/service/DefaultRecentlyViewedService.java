@@ -9,11 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayDeque;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
+
 public class DefaultRecentlyViewedService implements RecentlyViewedService {
     private final ProductDao productDao;
     private static final ReentrantLock lock = new ReentrantLock();
     private static final String RECENTLY_VIEWED_SESSION_ATTRIBUTE = DefaultRecentlyViewedService.class.getName() + "recentlyViewed";
-    private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
 
     private DefaultRecentlyViewedService() {
         productDao = ArrayListProductDao.getInstance();

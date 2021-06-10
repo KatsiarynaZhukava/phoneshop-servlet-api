@@ -9,11 +9,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
+import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
+
 public class ArrayListProductDao implements ProductDao {
     public long maxId;
     private List<Product> products;
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-    private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
+
 
     private ArrayListProductDao() {
         products = new ArrayList<>();

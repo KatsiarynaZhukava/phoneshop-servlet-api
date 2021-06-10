@@ -11,10 +11,11 @@ import com.es.phoneshop.model.product.ProductDao;
 import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
+
 public class DefaultCartService implements CartService {
     private final ProductDao productDao;
     private static final ReentrantLock lock = new ReentrantLock();
-    private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + "cart";
 
     private DefaultCartService() {
