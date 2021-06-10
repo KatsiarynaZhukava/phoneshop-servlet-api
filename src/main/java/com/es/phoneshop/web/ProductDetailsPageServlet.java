@@ -4,10 +4,13 @@ import com.es.phoneshop.exception.InvalidValueException;
 import com.es.phoneshop.exception.NotFoundException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
+import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.service.CartService;
 import com.es.phoneshop.service.DefaultCartService;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.service.DefaultRecentlyViewedService;
+import com.es.phoneshop.service.RecentlyViewedService;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -18,10 +21,12 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayDeque;
 
 public class ProductDetailsPageServlet extends HttpServlet {
     private ProductDao productDao;
     private CartService cartService;
+    private RecentlyViewedService recentlyViewedService;
     private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
     private static final String PRODUCT_OUT_OF_STOCK_WITH_ITEMS_IN_CART = "Not enough stock: your overall request is {0} including {1} already in cart, available {2}";
     private static final String PRODUCT_OUT_OF_STOCK_WITHOUT_ITEMS_IN_CART = "Not enough stock, available {0}";
@@ -33,19 +38,23 @@ public class ProductDetailsPageServlet extends HttpServlet {
         super.init(config);
         productDao = ArrayListProductDao.getInstance();
         cartService = DefaultCartService.getInstance();
+        recentlyViewedService = DefaultRecentlyViewedService.getInstance();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String productId = request.getPathInfo();
+        String productId = request.getPathInfo().substring(1);
         try {
-            request.setAttribute("product", productDao.getProduct(Long.valueOf(productId.substring(1)))
+            request.setAttribute("product", productDao.getProduct(Long.valueOf(productId))
                     .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId)));
             request.setAttribute("cart", cartService.getCart(request));
+
+            recentlyViewedService.add(recentlyViewedService.getRecentlyViewed(request), Long.valueOf(productId));
+            request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewed(request));
             request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
         } catch (NotFoundException | NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            request.setAttribute("productId", productId.substring(1));
+            request.setAttribute("productId", productId);
             request.getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp").forward(request, response);
         }
     }
