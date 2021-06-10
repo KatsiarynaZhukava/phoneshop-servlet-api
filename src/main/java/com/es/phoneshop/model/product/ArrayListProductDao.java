@@ -20,8 +20,9 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     private static class InstanceHolder {
-        public static final ProductDao INSTANCE = new ArrayListProductDao();
+        private static final ProductDao INSTANCE = new ArrayListProductDao();
     }
+
     public static ProductDao getInstance() {
         return InstanceHolder.INSTANCE;
     }
