@@ -51,7 +51,7 @@ public class DefaultCartService implements CartService {
     }
 
     @Override
-    public void add (final Cart cart, final Long productId, long requestedQuantity, final HttpSession session) throws OutOfStockException {
+    public void add(final Cart cart, final Long productId, long requestedQuantity, final HttpSession session) throws OutOfStockException {
         Lock lock = sessionLockManager.getSessionLock(session);
         lock.lock();
         try {
@@ -73,6 +73,27 @@ public class DefaultCartService implements CartService {
             }
             cartItems.removeIf(cartItem -> cartItem.getProduct().equals(product));
             cartItems.add(new CartItem(product, requestedQuantity + quantityOfItemsInCart));
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void update(final Cart cart, final Long productId, final long quantity, final HttpSession session) throws OutOfStockException {
+        Lock lock = sessionLockManager.getSessionLock(session);
+        lock.lock();
+        try {
+            Product product = productDao.getProduct(productId)
+                                        .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId));
+            if ( product.getStock() < (quantity) ) {
+                throw new OutOfStockException(product, quantity, product.getStock(), 0);
+            }
+            List<CartItem> cartItems = cart.getItems();
+            cartItems.stream()
+                     .filter(cartItem -> cartItem.getProduct().equals(product))
+                     .findFirst()
+                     .get()
+                     .setQuantity(quantity);
         } finally {
             lock.unlock();
         }

@@ -5,43 +5,66 @@
 
 <jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
 <tags:master pageTitle="Cart">
-    <table>
-        <thead>
-        <tr>
-            <td>Image</td>
-            <td>
-                Description
-            </td>
-            <td class="price">
-                Price
-            </td>
-            <td class="quantity">
-                Quantity
-            </td>
-        </tr>
-        </thead>
-        <c:forEach var="item" items="${cart.items}">
+    <p>Cart: ${cart}</p>
+    <c:if test="${not empty param.message}">
+        <p class="success">
+                ${param.message}
+        </p>
+    </c:if>
+    <c:if test="${not empty errors}">
+        <p class="error">
+            Errors occurred while updating the cart
+        </p>
+    </c:if>
+    <form method="post" action="${pageContext.servletContext.contextPath}/cart">
+        <table>
+            <thead>
             <tr>
+                <td>Image</td>
                 <td>
-                    <img class="product-tile" src="${item.product.imageUrl}">
-                </td>
-                <td>
-                    <a href="${pageContext.servletContext.contextPath}/products/${item.product.id}">
-                            ${item.product.description}
-                    </a>
+                    Description
                 </td>
                 <td class="price">
-                    <a href='#' onclick='window.open("${pageContext.servletContext.contextPath}/price-history/${item.product.id}", "_blank", "height=300,width=350");'>
-                        <fmt:formatNumber value="${item.product.price}" type="currency" currencySymbol="${item.product.currency.symbol}"/>
-                    </a>
+                    Price
                 </td>
-                <td>
-                    <fmt:formatNumber value="${item.quantity}" var="quantity"/>
-                    <input class="quantity" name="quantity" value="${quantity}"/>
+                <td class="quantity">
+                    Quantity
                 </td>
             </tr>
-        </c:forEach>
-    </table>
+            </thead>
+            <c:forEach var="item" items="${cart.items}" varStatus="status">
+                <tr>
+                    <td>
+                        <img class="product-tile" src="${item.product.imageUrl}">
+                    </td>
+                    <td>
+                        <a href="${pageContext.servletContext.contextPath}/products/${item.product.id}">
+                                ${item.product.description}
+                        </a>
+                    </td>
+                    <td class="price">
+                        <a href='#' onclick='window.open("${pageContext.servletContext.contextPath}/price-history/${item.product.id}", "_blank", "height=300,width=350");'>
+                            <fmt:formatNumber value="${item.product.price}" type="currency" currencySymbol="${item.product.currency.symbol}"/>
+                        </a>
+                    </td>
+                    <td>
+                        <fmt:formatNumber value="${item.quantity}" var="quantity"/>
+                        <c:set var="error" value="${errors[item.product.id]}"/>
+                        <input class="quantity" name="quantity" value="${not empty error ? paramValues["quantity"][status.index] : quantity}"/>
+                        <c:if test="${not empty error}">
+                            <p class="error">
+                                    ${errors[item.product.id]}
+                            </p>
+                        </c:if>
+                        <input type="hidden" name="productId" value="${item.product.id}"/>
+                    </td>
+                </tr>
+            </c:forEach>
+        </table>
+        <p>
+            <button>Update</button>
+        </p>
+    </form>
     <footer>
         <jsp:include page="recentlyViewed.jsp"/>
     </footer>

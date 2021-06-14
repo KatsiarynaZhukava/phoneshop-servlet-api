@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 public class CartItem implements Serializable {
     private final Product product;
-    private final long quantity;
+    private long quantity;
 
     public CartItem( final Product product,
                      final long quantity ) {
@@ -18,8 +18,12 @@ public class CartItem implements Serializable {
         return product;
     }
 
-    public long getQuantity() {
+    public synchronized long getQuantity() {
         return quantity;
+    }
+
+    public synchronized void setQuantity(long quantity) {
+        this.quantity = quantity;
     }
 
     @Override
