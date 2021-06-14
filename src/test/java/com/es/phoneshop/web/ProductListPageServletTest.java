@@ -11,6 +11,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -27,6 +28,8 @@ public class ProductListPageServletTest {
     private RequestDispatcher requestDispatcher;
     @Mock
     private ServletConfig config;
+    @Mock
+    private HttpSession httpSession;
 
     private final ProductListPageServlet servlet = new ProductListPageServlet();
 
@@ -34,12 +37,14 @@ public class ProductListPageServletTest {
     public void setup() throws ServletException {
         servlet.init(config);
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+        when(request.getSession()).thenReturn(httpSession);
     }
 
     @Test
     public void testDoGet() throws ServletException, IOException {
         servlet.doGet(request, response);
         verify(request).setAttribute(eq("products"), any());
+        verify(request).setAttribute(eq("recentlyViewedProducts"), any());
         verify(requestDispatcher).forward(request, response);
     }
 }

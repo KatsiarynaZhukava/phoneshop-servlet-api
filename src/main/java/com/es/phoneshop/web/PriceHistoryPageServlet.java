@@ -11,9 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
+
 public class PriceHistoryPageServlet extends HttpServlet {
     private ProductDao productDao;
-    private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
 
     @Override
     public void init(ServletConfig config) throws ServletException {

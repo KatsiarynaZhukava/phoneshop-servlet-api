@@ -46,4 +46,7 @@
       </tr>
     </c:forEach>
   </table>
+  <footer>
+    <jsp:include page="recentlyViewed.jsp"/>
+  </footer>
 </tags:master>
