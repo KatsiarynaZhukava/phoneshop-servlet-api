@@ -1,7 +1,7 @@
 package com.es.phoneshop.model.product;
 
 import com.es.phoneshop.exception.NotFoundException;
-import com.es.phoneshop.util.DataManager;
+import com.es.phoneshop.util.DataProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,12 +13,11 @@ import static org.junit.Assert.*;
 
 public class ArrayListProductDaoTest
 {
-    private ProductDao productDao;
+    private final ProductDao productDao = ArrayListProductDao.getInstance();
 
     @Before
     public void setup() {
-        DataManager.setUpProductDao();
-        productDao = ArrayListProductDao.getInstance();
+        DataProvider.setUpProductDao();
     }
 
     @Test

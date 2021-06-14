@@ -4,20 +4,24 @@ import com.es.phoneshop.exception.NotFoundException;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.util.lock.DefaultSessionLockManager;
+import com.es.phoneshop.util.lock.SessionLockManager;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayDeque;
-import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.http.HttpSession;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
 
 import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
 
 public class DefaultRecentlyViewedService implements RecentlyViewedService {
     private final ProductDao productDao;
-    private static final ReentrantLock lock = new ReentrantLock();
     private static final String RECENTLY_VIEWED_SESSION_ATTRIBUTE = DefaultRecentlyViewedService.class.getName() + "recentlyViewed";
+    private static final Long RECENTLY_VIEWED_NUMBER_OF_ITEMS = 3L;
+    private final SessionLockManager sessionLockManager;
 
     private DefaultRecentlyViewedService() {
         productDao = ArrayListProductDao.getInstance();
+        sessionLockManager = new DefaultSessionLockManager();
     }
 
     private static class InstanceHolder {
@@ -29,12 +33,13 @@ public class DefaultRecentlyViewedService implements RecentlyViewedService {
     }
 
     @Override
-    public ArrayDeque<Product> getRecentlyViewed(final HttpServletRequest request) {
+    public ConcurrentLinkedQueue<Product> getRecentlyViewed(final HttpSession session) {
+        Lock lock = sessionLockManager.getSessionLock(session);
         lock.lock();
         try {
-            ArrayDeque<Product> recentlyViewedProducts = (ArrayDeque<Product>) request.getSession().getAttribute(RECENTLY_VIEWED_SESSION_ATTRIBUTE);
+            ConcurrentLinkedQueue<Product> recentlyViewedProducts = (ConcurrentLinkedQueue<Product>) session.getAttribute(RECENTLY_VIEWED_SESSION_ATTRIBUTE);
             if (recentlyViewedProducts == null) {
-                request.getSession().setAttribute(RECENTLY_VIEWED_SESSION_ATTRIBUTE, recentlyViewedProducts = new ArrayDeque<>(3));
+                session.setAttribute(RECENTLY_VIEWED_SESSION_ATTRIBUTE, recentlyViewedProducts = new ConcurrentLinkedQueue<>());
             }
             return recentlyViewedProducts;
         } finally {
@@ -43,15 +48,16 @@ public class DefaultRecentlyViewedService implements RecentlyViewedService {
     }
 
     @Override
-    public void add(final ArrayDeque<Product> recentlyViewedProducts, final Long productId) {
+    public void add(final ConcurrentLinkedQueue<Product> recentlyViewedProducts, final Long productId, final HttpSession session) {
+        Lock lock = sessionLockManager.getSessionLock(session);
         lock.lock();
         try {
             Product product = productDao.getProduct(productId)
                                         .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId));
             recentlyViewedProducts.remove(product);
-            recentlyViewedProducts.addLast(product);
-            if (recentlyViewedProducts.size() > 3) {
-                recentlyViewedProducts.removeFirst();
+            recentlyViewedProducts.add(product);
+            if (recentlyViewedProducts.size() > RECENTLY_VIEWED_NUMBER_OF_ITEMS) {
+                recentlyViewedProducts.remove();
             }
         } finally {
             lock.unlock();

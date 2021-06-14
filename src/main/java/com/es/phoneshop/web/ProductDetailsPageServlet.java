@@ -16,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
@@ -40,12 +41,13 @@ public class ProductDetailsPageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String productId = request.getPathInfo().substring(1);
         try {
+            HttpSession httpSession = request.getSession();
             request.setAttribute("product", productDao.getProduct(Long.valueOf(productId))
                     .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId)));
-            request.setAttribute("cart", cartService.getCart(request));
+            request.setAttribute("cart", cartService.getCart(httpSession));
 
-            recentlyViewedService.add(recentlyViewedService.getRecentlyViewed(request), Long.valueOf(productId));
-            request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewed(request));
+            recentlyViewedService.add(recentlyViewedService.getRecentlyViewed(httpSession), Long.valueOf(productId), httpSession);
+            request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewed(httpSession));
             request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
         } catch (NotFoundException | NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -58,11 +60,11 @@ public class ProductDetailsPageServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Long quantity = getQuantity(request, response);
         if (quantity != null) {
-            Cart cart = cartService.getCart(request);
+            Cart cart = cartService.getCart(request.getSession());
             Long productId;
             try {
                 productId = Long.valueOf(request.getPathInfo().substring(1));
-                cartService.add(cart, productId, quantity);
+                cartService.add(cart, productId, quantity, request.getSession());
             } catch (NumberFormatException e) {
                 handleException(request, response, ID_NOT_A_NUMBER);
                 return;
@@ -78,7 +80,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     private Long getQuantity(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String quantityString = request.getParameter("quantity");
-        long quantity;
+        Long quantity;
         NumberFormat numberFormat = NumberFormat.getInstance(request.getLocale());
         try {
             Number quantityNumber = numberFormat.parse(quantityString);
@@ -90,10 +92,10 @@ public class ProductDetailsPageServlet extends HttpServlet {
             if (quantity <= 0) throw new InvalidValueException( QUANTITY_NON_POSITIVE_VALUE );
         } catch (ParseException e) {
             handleException(request, response, "Not a number");
-            return null;
+            quantity = null;
         } catch (InvalidValueException e) {
             handleException(request, response, e.getMessage());
-            return null;
+            quantity = null;
         }
         return quantity;
     }

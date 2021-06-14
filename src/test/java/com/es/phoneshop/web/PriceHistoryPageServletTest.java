@@ -35,8 +35,6 @@ public class PriceHistoryPageServletTest {
     private RequestDispatcher requestDispatcher;
     @Mock
     private ServletConfig config;
-    @Mock
-    private ProductDao productDao;
 
     private final PriceHistoryPageServlet servlet = new PriceHistoryPageServlet();
 
@@ -44,8 +42,7 @@ public class PriceHistoryPageServletTest {
     public void setup() throws ServletException {
         servlet.init(config);
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
-
-        productDao = ArrayListProductDao.getInstance();
+        ProductDao productDao = ArrayListProductDao.getInstance();
         productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), Currency.getInstance("USD"), 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
     }
 

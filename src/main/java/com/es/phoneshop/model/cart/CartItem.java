@@ -3,8 +3,8 @@ package com.es.phoneshop.model.cart;
 import com.es.phoneshop.model.product.Product;
 
 public class CartItem {
-    private Product product;
-    private long quantity;
+    private final Product product;
+    private final long quantity;
 
     public CartItem( final Product product,
                      final long quantity ) {

@@ -10,7 +10,7 @@ import java.util.Calendar;
 import java.util.Currency;
 import java.util.HashMap;
 
-public class DataManager {
+public class DataProvider {
     public static void setUpProductDao() {
         ProductDao productDao = ArrayListProductDao.getInstance();
         Currency usd = Currency.getInstance("USD");

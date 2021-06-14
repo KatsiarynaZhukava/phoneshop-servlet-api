@@ -18,17 +18,15 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DemoDataServletContextListenerTest {
     @Mock
-    private ProductDao productDao;
-    @Mock
     private ServletContextEvent servletContextEvent;
     @Mock
     private ServletContext servletContext;
+    private final ProductDao productDao = ArrayListProductDao.getInstance();
 
     DemoDataServletContextListener servletContextListener = new DemoDataServletContextListener();
 
     @Before
     public void setup() {
-        productDao = ArrayListProductDao.getInstance();
         if (!productDao.findProducts(null, null, null).isEmpty()) {
             productDao.clear();
         }

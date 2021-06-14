@@ -2,10 +2,10 @@ package com.es.phoneshop.service;
 
 import com.es.phoneshop.model.product.Product;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayDeque;
+import javax.servlet.http.HttpSession;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public interface RecentlyViewedService {
-    ArrayDeque<Product> getRecentlyViewed(HttpServletRequest request);
-    void add(ArrayDeque<Product> recentlyViewedProducts, Long productId);
+    ConcurrentLinkedQueue<Product> getRecentlyViewed(HttpSession session);
+    void add(ConcurrentLinkedQueue<Product> recentlyViewedProducts, Long productId, HttpSession session);
 }

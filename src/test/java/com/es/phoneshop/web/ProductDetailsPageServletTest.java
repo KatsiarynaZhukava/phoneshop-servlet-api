@@ -1,8 +1,10 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.model.product.ArrayListProductDao;
-import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
+import com.es.phoneshop.service.CartService;
+import com.es.phoneshop.service.DefaultCartService;
+import com.es.phoneshop.util.DataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,11 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Currency;
-import java.util.HashMap;
 import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -38,9 +35,8 @@ public class ProductDetailsPageServletTest {
     @Mock
     private ServletConfig config;
     @Mock
-    private ProductDao productDao;
-    @Mock
     private HttpSession httpSession;
+    private final CartService cartService = DefaultCartService.getInstance();
 
     private final ProductDetailsPageServlet servlet = new ProductDetailsPageServlet();
 
@@ -49,8 +45,7 @@ public class ProductDetailsPageServletTest {
         servlet.init(config);
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
         when(request.getSession()).thenReturn(httpSession);
-        productDao = ArrayListProductDao.getInstance();
-        productDao.save(new Product(null, "sgs", "Samsung Galaxy S", new BigDecimal(100), Currency.getInstance("USD"), 100, "https://github.com/andrewosipenko/phoneshop-ext-images/blob/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg?raw=true", new HashMap<LocalDateTime, BigDecimal>(){{ put(LocalDateTime.of(2021, Calendar.JUNE, 30, 10, 2, 3), new BigDecimal(200)); put(LocalDateTime.now(), new BigDecimal(100)); }} ));
+        DataProvider.setUpProductDao();
     }
 
     @Test
@@ -130,7 +125,21 @@ public class ProductDetailsPageServletTest {
     }
 
     @Test
-    public void testDoPostStockExceededWithItemsInCart() throws ServletException, IOException {
+    public void testDoPostStockExceededWithItemsInCart() throws ServletException, IOException, OutOfStockException {
+        when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("quantity")).thenReturn("100");
+        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
+
+        Cart cart = new Cart();
+        cartService.add(cart, 0L, 1L, httpSession);
+
+        when(request.getSession().getAttribute(DefaultCartService.class.getName() + "cart")).thenReturn(cart);
+        servlet.doPost(request, response);
+        verify(request).setAttribute(eq("error"), any());
+    }
+
+    @Test
+    public void testDoPostAddToCartSuccess() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/0");
         when(request.getParameter("quantity")).thenReturn("1");
         when(request.getContextPath()).thenReturn("http://localhost:8080/phoneshop-servlet-api");

@@ -1,93 +1,88 @@
 package com.es.phoneshop.service;
 
 import com.es.phoneshop.exception.NotFoundException;
-import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.ProductDao;
-import com.es.phoneshop.util.DataManager;
+import com.es.phoneshop.util.DataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecentlyViewedServiceTest {
     @Mock
-    private HttpServletRequest request;
-    @Mock
     private HttpSession httpSession;
-    private RecentlyViewedService recentlyViewedService;
-    private ProductDao productDao;
+    private final RecentlyViewedService recentlyViewedService = DefaultRecentlyViewedService.getInstance();
 
     @Before
     public void setup() {
-        DataManager.setUpProductDao();
-        productDao = ArrayListProductDao.getInstance();
-        recentlyViewedService = DefaultRecentlyViewedService.getInstance();
-        when(request.getSession()).thenReturn(httpSession);
+        DataProvider.setUpProductDao();
     }
 
     @Test
     public void testGetRecentlyViewedNotInSession() {
-        ArrayDeque<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(request);
+        ConcurrentLinkedQueue<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(httpSession);
         assertNotEquals(null, recentlyViewedProducts);
         assertEquals(0, recentlyViewedProducts.size());
     }
 
     @Test
     public void testGetRecentlyViewedAlreadyInSession() {
-        ArrayDeque<Product> recentlyViewedProducts;
-        when(request.getSession().getAttribute(DefaultRecentlyViewedService.class.getName() + "recentlyViewed")).thenReturn(recentlyViewedProducts = new ArrayDeque<>());
-        ArrayDeque<Product> recentlyViewedFromService = recentlyViewedService.getRecentlyViewed(request);
+        ConcurrentLinkedQueue<Product> recentlyViewedProducts;
+        when(httpSession.getAttribute(DefaultRecentlyViewedService.class.getName() + "recentlyViewed")).thenReturn(recentlyViewedProducts = new ConcurrentLinkedQueue<>());
+        ConcurrentLinkedQueue<Product> recentlyViewedFromService = recentlyViewedService.getRecentlyViewed(httpSession);
         assertEquals(recentlyViewedProducts, recentlyViewedFromService);
     }
 
     @Test(expected = NotFoundException.class)
     public void testAddToRecentlyViewedInvalidProductId() {
-        ArrayDeque<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(request);
-        recentlyViewedService.add(recentlyViewedProducts, -1L);
+        ConcurrentLinkedQueue<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, -1L, httpSession);
     }
 
     @Test
     public void testAddSameProductToRecentlyViewed() {
-        ArrayDeque<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(request);
-        recentlyViewedService.add(recentlyViewedProducts, 0L);
+        ConcurrentLinkedQueue<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, 0L, httpSession);
         assertEquals(1, recentlyViewedProducts.size());
-        recentlyViewedService.add(recentlyViewedProducts, 0L);
+        recentlyViewedService.add(recentlyViewedProducts, 0L, httpSession);
         assertEquals(1, recentlyViewedProducts.size());
     }
 
     @Test
     public void testAddSameProductWithAnotherProduct() {
-        ArrayDeque<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(request);
-        recentlyViewedService.add(recentlyViewedProducts, 0L);
+        ConcurrentLinkedQueue<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, 0L, httpSession);
         assertEquals(1, recentlyViewedProducts.size());
-        recentlyViewedService.add(recentlyViewedProducts, 1L);
+        recentlyViewedService.add(recentlyViewedProducts, 1L, httpSession);
         assertEquals(2, recentlyViewedProducts.size());
-        recentlyViewedService.add(recentlyViewedProducts, 0L);
+        recentlyViewedService.add(recentlyViewedProducts, 0L, httpSession);
         assertEquals(2, recentlyViewedProducts.size());
-        assertEquals(1L, recentlyViewedProducts.getFirst().getId().longValue());
-        assertEquals(0L, recentlyViewedProducts.getLast().getId().longValue());
+        assertEquals(1L, recentlyViewedProducts.element().getId().longValue());
+        recentlyViewedProducts.remove();
+        assertEquals(0L, recentlyViewedProducts.element().getId().longValue());
     }
 
     @Test
     public void testAddFourProductsToRecentlyViewed() {
-        ArrayDeque<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(request);
-        recentlyViewedService.add(recentlyViewedProducts, 0L);
-        recentlyViewedService.add(recentlyViewedProducts, 1L);
-        recentlyViewedService.add(recentlyViewedProducts, 2L);
-        recentlyViewedService.add(recentlyViewedProducts, 3L);
+        ConcurrentLinkedQueue<Product> recentlyViewedProducts = recentlyViewedService.getRecentlyViewed(httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, 0L, httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, 1L, httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, 2L, httpSession);
+        recentlyViewedService.add(recentlyViewedProducts, 3L, httpSession);
         assertEquals(3, recentlyViewedProducts.size());
-        assertEquals(1L, recentlyViewedProducts.getFirst().getId().longValue());
-        assertTrue(recentlyViewedProducts.contains(productDao.getProduct(2L).get()));
-        assertEquals(3L, recentlyViewedProducts.getLast().getId().longValue());
+        assertEquals(1L, recentlyViewedProducts.element().getId().longValue());
+        recentlyViewedProducts.remove();
+        assertEquals(2L, recentlyViewedProducts.element().getId().longValue());
+        recentlyViewedProducts.remove();
+        assertEquals(3L, recentlyViewedProducts.element().getId().longValue());
     }
 }

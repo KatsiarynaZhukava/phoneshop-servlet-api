@@ -7,19 +7,24 @@ import com.es.phoneshop.model.cart.CartItem;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.util.lock.DefaultSessionLockManager;
+import com.es.phoneshop.util.lock.SessionLockManager;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.http.HttpSession;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
 
 public class DefaultCartService implements CartService {
     private final ProductDao productDao;
-    private static final ReentrantLock lock = new ReentrantLock();
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + "cart";
+    private final SessionLockManager sessionLockManager;
 
     private DefaultCartService() {
         productDao = ArrayListProductDao.getInstance();
+        sessionLockManager = new DefaultSessionLockManager();
     }
 
     private static class InstanceHolder {
@@ -31,12 +36,13 @@ public class DefaultCartService implements CartService {
     }
 
     @Override
-    public Cart getCart(final HttpServletRequest request) {
+    public Cart getCart(final HttpSession session) {
+        Lock lock = sessionLockManager.getSessionLock(session);
         lock.lock();
         try {
-            Cart cart = (Cart) request.getSession().getAttribute(CART_SESSION_ATTRIBUTE);
+            Cart cart = (Cart) session.getAttribute(CART_SESSION_ATTRIBUTE);
             if (cart == null) {
-                request.getSession().setAttribute(CART_SESSION_ATTRIBUTE, cart = new Cart());
+                session.setAttribute(CART_SESSION_ATTRIBUTE, cart = new Cart());
             }
             return cart;
         } finally {
@@ -45,20 +51,28 @@ public class DefaultCartService implements CartService {
     }
 
     @Override
-    public void add (final Cart cart, final Long productId, long requestedQuantity) throws OutOfStockException {
+    public void add (final Cart cart, final Long productId, long requestedQuantity, final HttpSession session) throws OutOfStockException {
+        Lock lock = sessionLockManager.getSessionLock(session);
         lock.lock();
         try {
             Product product = productDao.getProduct(productId)
                                         .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID, productId));
-            long quantityOfItemsInCart = cart.getItems().stream()
-                                                        .filter(cartItem -> cartItem.getProduct().getId().equals(productId))
-                                                        .map(CartItem::getQuantity)
-                                                        .reduce(Long::sum)
-                                                        .orElse(0L);
-            if ( product.getStock() < (quantityOfItemsInCart + requestedQuantity) ) {
+            List<CartItem> cartItems = cart.getItems();
+            long quantityOfItemsInCart = cartItems.stream()
+                                                  .map(CartItem::getProduct)
+                                                  .collect(Collectors.toList())
+                                                  .contains(product) ?
+                    cartItems.stream()
+                             .filter(cartItem -> cartItem.getProduct().equals(product))
+                             .findFirst()
+                             .get()
+                             .getQuantity()
+                    : 0;
+            if ( product.getStock() < (quantityOfItemsInCart + requestedQuantity ) ) {
                 throw new OutOfStockException(product, quantityOfItemsInCart + requestedQuantity, product.getStock(), quantityOfItemsInCart);
             }
-            cart.getItems().add(new CartItem(product, requestedQuantity));
+            cartItems.removeIf(cartItem -> cartItem.getProduct().equals(product));
+            cartItems.add(new CartItem(product, requestedQuantity + quantityOfItemsInCart));
         } finally {
             lock.unlock();
         }

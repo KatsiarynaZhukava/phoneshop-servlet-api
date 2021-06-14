@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<jsp:useBean id="recentlyViewedProducts" type="java.util.ArrayDeque" scope="request"/>
+<jsp:useBean id="recentlyViewedProducts" type="java.util.Queue" scope="request"/>
 
 <div>
     <c:if test="${not empty recentlyViewedProducts}">
