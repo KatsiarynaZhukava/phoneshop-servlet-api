@@ -98,4 +98,15 @@ public class DefaultCartService implements CartService {
             lock.unlock();
         }
     }
+
+    @Override
+    public void delete(Cart cart, Long productId, HttpSession session) {
+        Lock lock = sessionLockManager.getSessionLock(session);
+        lock.lock();
+        try {
+            cart.getItems().removeIf(cartItem -> cartItem.getProduct().getId().equals(productId));
+        } finally {
+            lock.unlock();
+        }
+    }
 }

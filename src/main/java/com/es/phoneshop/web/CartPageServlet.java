@@ -7,7 +7,6 @@ import com.es.phoneshop.service.CartService;
 import com.es.phoneshop.service.DefaultCartService;
 import com.es.phoneshop.service.DefaultRecentlyViewedService;
 import com.es.phoneshop.service.RecentlyViewedService;
-import com.es.phoneshop.util.Messages;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -50,14 +49,16 @@ public class CartPageServlet extends HttpServlet {
         String[] quantities = request.getParameterValues("quantity");
         Cart cart = cartService.getCart(request.getSession());
 
-        for (int i = 0; i < productIds.length; i++) {
-            Long productId = Long.valueOf(productIds[i]);
-            Long quantity = getQuantity(quantities[i], productId, request);
-            if (quantity != null) {
-                try {
-                    cartService.update(cart, productId, quantity, request.getSession());
-                } catch (OutOfStockException e) {
-                    errors.put(productId, MessageFormat.format(PRODUCT_OUT_OF_STOCK_WITHOUT_ITEMS_IN_CART, e.getStockAvailable()));
+        if (productIds != null) {
+            for (int i = 0; i < productIds.length; i++) {
+                Long productId = Long.valueOf(productIds[i]);
+                Long quantity = getQuantity(quantities[i], productId, request);
+                if (quantity != null) {
+                    try {
+                        cartService.update(cart, productId, quantity, request.getSession());
+                    } catch (OutOfStockException e) {
+                        errors.put(productId, MessageFormat.format(PRODUCT_OUT_OF_STOCK_WITHOUT_ITEMS_IN_CART, e.getStockAvailable()));
+                    }
                 }
             }
         }

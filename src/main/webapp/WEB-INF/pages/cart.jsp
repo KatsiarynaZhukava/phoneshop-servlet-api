@@ -5,7 +5,6 @@
 
 <jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
 <tags:master pageTitle="Cart">
-    <p>Cart: ${cart}</p>
     <c:if test="${not empty param.message}">
         <p class="success">
                 ${param.message}
@@ -29,6 +28,9 @@
                 </td>
                 <td class="quantity">
                     Quantity
+                </td>
+                <td>
+
                 </td>
             </tr>
             </thead>
@@ -58,12 +60,17 @@
                         </c:if>
                         <input type="hidden" name="productId" value="${item.product.id}"/>
                     </td>
+                    <td>
+                        <button form="deleteCartItem" formaction="${pageContext.servletContext.contextPath}/cart/deleteCartItem/${item.product.id}">Delete</button>
+                    </td>
                 </tr>
             </c:forEach>
         </table>
         <p>
             <button>Update</button>
         </p>
+    </form>
+    <form id="deleteCartItem" method="post">
     </form>
     <footer>
         <jsp:include page="recentlyViewed.jsp"/>
