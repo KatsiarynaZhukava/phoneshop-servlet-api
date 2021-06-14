@@ -1,9 +1,10 @@
 package com.es.phoneshop.model.cart;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Cart {
+public class Cart implements Serializable {
     private final CopyOnWriteArrayList<CartItem> items;
 
     public Cart() {
