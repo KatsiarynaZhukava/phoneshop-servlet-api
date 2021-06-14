@@ -65,6 +65,12 @@
                     </td>
                 </tr>
             </c:forEach>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Total cost: ${cart.totalCost}</td>
+                <td>Total quantity: ${cart.totalQuantity}</td>
+            </tr>
         </table>
         <p>
             <button>Update</button>

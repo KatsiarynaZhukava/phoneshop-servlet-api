@@ -11,6 +11,7 @@ import com.es.phoneshop.util.lock.DefaultSessionLockManager;
 import com.es.phoneshop.util.lock.SessionLockManager;
 
 import javax.servlet.http.HttpSession;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -73,6 +74,7 @@ public class DefaultCartService implements CartService {
             }
             cartItems.removeIf(cartItem -> cartItem.getProduct().equals(product));
             cartItems.add(new CartItem(product, requestedQuantity + quantityOfItemsInCart));
+            recalculateCart(cart);
         } finally {
             lock.unlock();
         }
@@ -94,6 +96,7 @@ public class DefaultCartService implements CartService {
                      .findFirst()
                      .get()
                      .setQuantity(quantity);
+            recalculateCart(cart);
         } finally {
             lock.unlock();
         }
@@ -105,8 +108,18 @@ public class DefaultCartService implements CartService {
         lock.lock();
         try {
             cart.getItems().removeIf(cartItem -> cartItem.getProduct().getId().equals(productId));
+            recalculateCart(cart);
         } finally {
             lock.unlock();
         }
+    }
+
+    private void recalculateCart(Cart cart) {
+        cart.setTotalQuantity(cart.getItems().stream()
+                                             .map(CartItem::getQuantity)
+                                             .mapToLong(quantity -> quantity).sum());
+        cart.setTotalCost(cart.getItems().stream()
+                                         .map(cartItem -> cartItem.getProduct().getPrice().multiply(new BigDecimal(cartItem.getQuantity())))
+                                         .reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 }
