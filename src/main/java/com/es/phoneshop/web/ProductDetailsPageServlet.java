@@ -1,6 +1,9 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.exception.InvalidValueException;
 import com.es.phoneshop.exception.NotFoundException;
+import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.service.CartService;
@@ -14,6 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.text.MessageFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+
+import static com.es.phoneshop.util.Messages.*;
 
 import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
 

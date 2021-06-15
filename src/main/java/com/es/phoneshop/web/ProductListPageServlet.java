@@ -6,7 +6,6 @@ import com.es.phoneshop.model.product.SortField;
 import com.es.phoneshop.model.product.SortOrder;
 import com.es.phoneshop.service.DefaultRecentlyViewedService;
 import com.es.phoneshop.service.RecentlyViewedService;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

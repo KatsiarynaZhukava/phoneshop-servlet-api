@@ -10,6 +10,7 @@ public class Cart implements Serializable {
     private long totalQuantity;
     private BigDecimal totalCost;
 
+
     public Cart() {
         this.items = new CopyOnWriteArrayList<>();
     }

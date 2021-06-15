@@ -12,7 +12,7 @@ public class DefaultSessionLockManager implements SessionLockManager, Serializab
     public Lock getSessionLock(HttpSession session) {
         Lock sessionLock = (Lock) session.getAttribute(LOCK_SESSION_ATTRIBUTE);
         if (sessionLock == null) {
-            synchronized (this) {
+            synchronized (session) {
                 session.setAttribute(LOCK_SESSION_ATTRIBUTE, sessionLock = new ReentrantLock());
             }
         }
