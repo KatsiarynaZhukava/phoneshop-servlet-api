@@ -92,7 +92,7 @@ public class DefaultCartService implements CartService {
             }
             List<CartItem> cartItems = cart.getItems();
             cartItems.stream()
-                     .filter(cartItem -> cartItem.getProduct().equals(product))
+                     .filter(cartItem -> cartItem.getProduct().getId().equals(productId))
                      .findFirst()
                      .get()
                      .setQuantity(quantity);
