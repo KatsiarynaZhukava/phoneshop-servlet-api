@@ -6,4 +6,4 @@
 <div>
     Cart: ${cart.totalQuantity} items, total cost
     <fmt:formatNumber value="${not empty cart.totalCost ? cart.totalCost : 0}" type="currency" currencySymbol="${cart.items[0].product.currency.symbol}"/>
-</div</p>
+</div>
