@@ -49,6 +49,7 @@
               ${error}
             </p>
           </c:if>
+          <input type="hidden" name="productId" value="${product.id}"/>
         </td>
       </tr>
     </table>
