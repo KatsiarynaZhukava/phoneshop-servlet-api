@@ -33,31 +33,34 @@ public abstract class AddToCartServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        productId = Long.valueOf(request.getParameter("productId"));
+        try {
+            productId = Long.valueOf(request.getParameter("productId"));
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getRequestURI()+ "?error=" + ID_NOT_A_NUMBER + "&id=" + productId);
+            return;
+        }
         Long quantity = getQuantity(request, response);
         if (quantity != null) {
             Cart cart = cartService.getCart(request.getSession());
             try {
                 cartService.add(cart, productId, quantity, request.getSession());
-            } catch (NumberFormatException e) {
-                handleException(request, response, ID_NOT_A_NUMBER);
-                return;
             } catch (OutOfStockException e) {
-                handleException(request, response, e.getQuantityOfItemsInCart() > 0 ?
+                String message = e.getQuantityOfItemsInCart() > 0 ?
                         MessageFormat.format(PRODUCT_OUT_OF_STOCK_WITH_ITEMS_IN_CART, e.getStockRequested(), e.getQuantityOfItemsInCart(), e.getStockAvailable()) :
-                        MessageFormat.format(PRODUCT_OUT_OF_STOCK_WITHOUT_ITEMS_IN_CART, e.getStockAvailable()));
+                        MessageFormat.format(PRODUCT_OUT_OF_STOCK_WITHOUT_ITEMS_IN_CART, e.getStockAvailable());
+                response.sendRedirect(request.getRequestURI()+ "?error=" + message + "&id=" + productId);
                 return;
             }
             response.sendRedirect(request.getRequestURI() + "?message=Added to cart successfully");
         }
     }
 
-    private Long getQuantity(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private Long getQuantity(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
         String quantityString = request.getParameter("quantity");
         Long quantity;
         NumberFormat numberFormat = NumberFormat.getInstance(request.getLocale());
         try {
-            Number quantityNumber = numberFormat.parse(quantityString);
+            Number quantityNumber =  numberFormat.parse(quantityString);
             if (quantityNumber.doubleValue() > Long.MAX_VALUE) {
                 throw new InvalidValueException( QUANTITY_TOO_LARGE );
             } else {
@@ -65,18 +68,12 @@ public abstract class AddToCartServlet extends HttpServlet {
             }
             if (quantity <= 0) throw new InvalidValueException( QUANTITY_NON_POSITIVE_VALUE );
         } catch (ParseException e) {
-            handleException(request, response, "Not a number");
+            response.sendRedirect(request.getRequestURI()+ "?error=Not a number&id=" + productId);
             quantity = null;
         } catch (InvalidValueException e) {
-            handleException(request, response, e.getMessage());
+            response.sendRedirect(request.getRequestURI()+ "?error=" + e.getMessage() + "&id=" + productId);
             quantity = null;
         }
         return quantity;
-    }
-
-    private void handleException(final HttpServletRequest request, final HttpServletResponse response, final String message) throws ServletException, IOException {
-        request.setAttribute("error", message);
-        request.setAttribute("errorProductId", productId);
-        doGet(request, response);
     }
 }

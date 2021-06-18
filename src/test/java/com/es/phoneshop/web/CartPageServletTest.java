@@ -66,7 +66,8 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"-1", "1"});
 
         servlet.doPost(request, response);
-        verify(request).setAttribute(eq("errors"), any());
+        verify(request.getSession()).setAttribute(eq("errors"), any());
+        verify(response, times(1)).sendRedirect(request.getContextPath());
     }
 
     @Test
@@ -75,7 +76,8 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"aaa", "1"});
 
         servlet.doPost(request, response);
-        verify(request).setAttribute(eq("errors"), any());
+        verify(request.getSession()).setAttribute(eq("errors"), any());
+        verify(response, times(1)).sendRedirect(request.getContextPath());
     }
 
     @Test
@@ -84,17 +86,28 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"100000000000000000000000000000000", "1"});
 
         servlet.doPost(request, response);
-        verify(request).setAttribute(eq("errors"), any());
+        verify(request.getSession()).setAttribute(eq("errors"), any());
+        verify(response, times(1)).sendRedirect(request.getContextPath());
     }
 
     @Test
     public void testDoPostStockExceeded() throws ServletException, IOException {
+        when(request.getParameterValues("productId")).thenReturn(new String[] {"0", "1"});
+        when(request.getParameterValues("quantity")).thenReturn(new String[] {"1", "10000"});
 
+        servlet.doPost(request, response);
+        verify(request.getSession()).setAttribute(eq("errors"), any());
+        verify(response, times(1)).sendRedirect(request.getContextPath());
     }
 
     @Test
-    public void testDoPostAddToCartSuccess() throws ServletException, IOException {
+    public void testDoPostUpdateCartSuccess() throws ServletException, IOException {
+        when(request.getParameterValues("productId")).thenReturn(new String[] {"0", "1"});
+        when(request.getParameterValues("quantity")).thenReturn(new String[] {"1", "1"});
+        when(request.getContextPath()).thenReturn("/phoneshop-servlet-api");
 
+        servlet.doPost(request, response);
+        verify(response, times(1)).sendRedirect(request.getContextPath() + "/cart?message=Cart updated successfully");
     }
 
     private void initializeCart() throws OutOfStockException {

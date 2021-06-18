@@ -10,7 +10,7 @@
                 ${param.message}
         </p>
     </c:if>
-    <c:if test="${not empty errors}">
+    <c:if test="${not empty sessionScope.errors}">
         <p class="error">
             Errors occurred while updating the cart
         </p>
@@ -51,11 +51,11 @@
                     </td>
                     <td>
                         <fmt:formatNumber value="${item.quantity}" var="quantity"/>
-                        <c:set var="error" value="${errors[item.product.id]}"/>
+                        <c:set var="error" value="${sessionScope.errors[item.product.id]}"/>
                         <input class="quantity" name="quantity" value="${not empty error ? paramValues["quantity"][status.index] : quantity}"/>
                         <c:if test="${not empty error}">
                             <p class="error">
-                                    ${errors[item.product.id]}
+                                    ${sessionScope.errors[item.product.id]}
                             </p>
                         </c:if>
                         <input type="hidden" name="productId" value="${item.product.id}"/>

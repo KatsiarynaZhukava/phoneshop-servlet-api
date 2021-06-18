@@ -5,16 +5,11 @@
 
 <jsp:useBean id="product" type="com.es.phoneshop.model.product.Product" scope="request"/>
 <tags:master pageTitle="Product Detail">
-  <p>Cart: ${cart}</p>
   <c:if test="${not empty param.message}">
-    <p class="success">
-        ${param.message}
-    </p>
+    <tags:message message="${param.message}"/>
   </c:if>
-  <c:if test="${not empty error}">
-    <p class="error">
-        An error occurred while adding to cart
-    </p>
+  <c:if test="${not empty param.error}">
+    <tags:error/>
   </c:if>
   <p>
       ${product.description}
@@ -43,10 +38,10 @@
       <tr>
         <td>Quantity</td>
         <td>
-          <input class="quantity" name="quantity" value="${not empty error ? param.quantity : 1}">
-          <c:if test="${not empty error}">
+          <input class="quantity" name="quantity" value="${not empty param.error ? param.quantity : 1}">
+          <c:if test="${not empty param.error}">
             <p class="error">
-              ${error}
+              ${param.error}
             </p>
           </c:if>
           <input type="hidden" name="productId" value="${product.id}"/>
