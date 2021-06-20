@@ -17,6 +17,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
+import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID_IN_CART;
 
 public class DefaultCartService implements CartService {
     private final ProductDao productDao;
@@ -66,7 +67,7 @@ public class DefaultCartService implements CartService {
                     cartItems.stream()
                              .filter(cartItem -> cartItem.getProduct().equals(product))
                              .findFirst()
-                             .get()
+                             .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID_IN_CART, productId))
                              .getQuantity()
                     : 0;
             if ( product.getStock() < (quantityOfItemsInCart + requestedQuantity ) ) {
@@ -94,7 +95,7 @@ public class DefaultCartService implements CartService {
             cartItems.stream()
                      .filter(cartItem -> cartItem.getProduct().getId().equals(productId))
                      .findFirst()
-                     .get()
+                     .orElseThrow(NotFoundException.supplier(PRODUCT_NOT_FOUND_BY_ID_IN_CART, productId))
                      .setQuantity(quantity);
             recalculateCart(cart);
         } finally {

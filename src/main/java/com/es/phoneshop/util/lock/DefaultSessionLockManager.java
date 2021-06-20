@@ -1,11 +1,10 @@
 package com.es.phoneshop.util.lock;
 
 import javax.servlet.http.HttpSession;
-import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class DefaultSessionLockManager implements SessionLockManager, Serializable {
+public class DefaultSessionLockManager implements SessionLockManager {
     private static final String LOCK_SESSION_ATTRIBUTE = "sessionLock";
 
     @Override

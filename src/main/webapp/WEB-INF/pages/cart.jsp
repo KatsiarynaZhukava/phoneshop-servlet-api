@@ -6,14 +6,10 @@
 <jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
 <tags:master pageTitle="Cart">
     <c:if test="${not empty param.message}">
-        <p class="success">
-                ${param.message}
-        </p>
+        <tags:message message="${param.message}" className="success"/>
     </c:if>
-    <c:if test="${not empty sessionScope.errors}">
-        <p class="error">
-            Errors occurred while updating the cart
-        </p>
+    <c:if test="${not empty errors}">
+        <tags:message message="Errors occurred while updating the cart" className="error"/>
     </c:if>
     <form method="post" action="${pageContext.servletContext.contextPath}/cart">
         <table>
@@ -51,11 +47,11 @@
                     </td>
                     <td>
                         <fmt:formatNumber value="${item.quantity}" var="quantity"/>
-                        <c:set var="error" value="${sessionScope.errors[item.product.id]}"/>
+                        <c:set var="error" value="${errors[item.product.id]}"/>
                         <input class="quantity" name="quantity" value="${not empty error ? paramValues["quantity"][status.index] : quantity}"/>
                         <c:if test="${not empty error}">
                             <p class="error">
-                                    ${sessionScope.errors[item.product.id]}
+                                    ${errors[item.product.id]}
                             </p>
                         </c:if>
                         <input type="hidden" name="productId" value="${item.product.id}"/>

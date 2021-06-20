@@ -17,8 +17,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProductListPageServletTest {
@@ -57,6 +56,6 @@ public class ProductListPageServletTest {
         when(request.getParameter("quantity")).thenReturn("1");
         when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         servlet.doPost(request, response);
-        response.sendRedirect(request.getRequestURI() + "?message=Added to cart successfully");
+        verify(response, times(1)).sendRedirect(request.getRequestURI() + "?message=Added to cart successfully");
     }
 }

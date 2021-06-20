@@ -6,10 +6,10 @@
 <jsp:useBean id="products" type="java.util.ArrayList" scope="request"/>
 <tags:master pageTitle="Product List">
   <c:if test="${not empty param.message}">
-    <tags:message message="${param.message}"/>
+    <tags:message message="${param.message}" className="success"/>
   </c:if>
-  <c:if test="${not empty param.error}">
-    <tags:error/>
+  <c:if test="${not empty error}">
+    <tags:message message="An error occurred while adding to cart" className="error"/>
   </c:if>
   <form>
     <input name="query" value="${param.query}">
@@ -46,10 +46,10 @@
             </a>
           </td>
           <td>
-            <input class="quantity" name="quantity" value="${not empty param.error && param.id == product.id ? param.quantity : 1}">
-            <c:if test="${not empty param.error && param.id == product.id}">
+            <input class="quantity" name="quantity" value="${not empty error && productId == product.id ? param.quantity : 1}">
+            <c:if test="${not empty error && productId == product.id}">
               <p class="error">
-                  ${param.error}
+                  ${error}
               </p>
             </c:if>
             <input type="hidden" name="productId" value="${product.id}"/>

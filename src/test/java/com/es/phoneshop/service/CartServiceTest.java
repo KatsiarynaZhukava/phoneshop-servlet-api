@@ -114,6 +114,13 @@ public class CartServiceTest {
     }
 
     @Test(expected = NotFoundException.class)
+    public void testUpdateCartProductNotInCart() throws OutOfStockException {
+        Cart cart = cartService.getCart(httpSession);
+        cartService.add(cart, 0L, 1L, httpSession);
+        cartService.update(cart, 4L, 2L, httpSession);
+    }
+
+    @Test(expected = NotFoundException.class)
     public void testUpdateCartInvalidProductId() throws OutOfStockException {
         Cart cart = cartService.getCart(httpSession);
         cartService.add(cart, 0L, 1L, httpSession);

@@ -17,7 +17,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.util.Locale;
 
@@ -66,8 +65,7 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"-1", "1"});
 
         servlet.doPost(request, response);
-        verify(request.getSession()).setAttribute(eq("errors"), any());
-        verify(response, times(1)).sendRedirect(request.getContextPath());
+        verify(request).setAttribute(eq("errors"), any());
     }
 
     @Test
@@ -76,8 +74,7 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"aaa", "1"});
 
         servlet.doPost(request, response);
-        verify(request.getSession()).setAttribute(eq("errors"), any());
-        verify(response, times(1)).sendRedirect(request.getContextPath());
+        verify(request).setAttribute(eq("errors"), any());
     }
 
     @Test
@@ -86,8 +83,25 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"100000000000000000000000000000000", "1"});
 
         servlet.doPost(request, response);
-        verify(request.getSession()).setAttribute(eq("errors"), any());
-        verify(response, times(1)).sendRedirect(request.getContextPath());
+        verify(request).setAttribute(eq("errors"), any());
+    }
+
+    @Test
+    public void testDoPostWithInvalidProductId() throws ServletException, IOException {
+        when(request.getParameterValues("productId")).thenReturn(new String[] {"AAAA"});
+        when(request.getParameterValues("quantity")).thenReturn(new String[] {"1"});
+
+        servlet.doPost(request, response);
+        verify(request).setAttribute(eq("errors"), any());
+    }
+
+    @Test
+    public void testDoPostWithProductNotInCart() throws ServletException, IOException {
+        when(request.getParameterValues("productId")).thenReturn(new String[] {"4"});
+        when(request.getParameterValues("quantity")).thenReturn(new String[] {"1"});
+
+        servlet.doPost(request, response);
+        verify(request).setAttribute(eq("errors"), any());
     }
 
     @Test
@@ -96,8 +110,7 @@ public class CartPageServletTest {
         when(request.getParameterValues("quantity")).thenReturn(new String[] {"1", "10000"});
 
         servlet.doPost(request, response);
-        verify(request.getSession()).setAttribute(eq("errors"), any());
-        verify(response, times(1)).sendRedirect(request.getContextPath());
+        verify(request).setAttribute(eq("errors"), any());
     }
 
     @Test
