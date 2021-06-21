@@ -45,6 +45,7 @@ public class ProductDetailsPageServletTest {
         servlet.init(config);
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
         when(request.getSession()).thenReturn(httpSession);
+        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         DataProvider.setUpProductDao();
     }
 
@@ -82,69 +83,73 @@ public class ProductDetailsPageServletTest {
     @Test
     public void testDoPostWithNonPositiveQuantity() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("productId")).thenReturn("0");
         when(request.getParameter("quantity")).thenReturn("-1");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         servlet.doPost(request, response);
         verify(request).setAttribute(eq("error"), any());
+        verify(request).setAttribute(eq("productId"), any());
     }
 
     @Test
     public void testDoPostWithQuantityNotANumber() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("productId")).thenReturn("0");
         when(request.getParameter("quantity")).thenReturn("blabla");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         servlet.doPost(request, response);
+
         verify(request).setAttribute(eq("error"), any());
+        verify(request).setAttribute(eq("productId"), any());
     }
 
     @Test
     public void testDoPostWithTooLargeQuantity() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("productId")).thenReturn("0");
         when(request.getParameter("quantity")).thenReturn("10000000000000000000000000000000000000000");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         servlet.doPost(request, response);
         verify(request).setAttribute(eq("error"), any());
-    }
+        verify(request).setAttribute(eq("productId"), any());      }
 
     @Test
     public void testDoPostWithInvalidProductId() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/aaa");
-        when(request.getParameter("quantity")).thenReturn("1");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
+        when(request.getParameter("productId")).thenReturn("aaa");
         servlet.doPost(request, response);
         verify(request).setAttribute(eq("error"), any());
+        verify(request, times(2)).setAttribute(eq("productId"), any());
+        verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
+        verify(requestDispatcher).forward(request, response);
     }
 
     @Test
     public void testDoPostStockExceeded() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("productId")).thenReturn("0");
         when(request.getParameter("quantity")).thenReturn("10000");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         servlet.doPost(request, response);
         verify(request).setAttribute(eq("error"), any());
+        verify(request).setAttribute(eq("productId"), any());
     }
 
     @Test
     public void testDoPostStockExceededWithItemsInCart() throws ServletException, IOException, OutOfStockException {
         when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("productId")).thenReturn("0");
         when(request.getParameter("quantity")).thenReturn("100");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
 
         Cart cart = new Cart();
         cartService.add(cart, 0L, 1L, httpSession);
-
         when(request.getSession().getAttribute(DefaultCartService.class.getName() + "cart")).thenReturn(cart);
         servlet.doPost(request, response);
         verify(request).setAttribute(eq("error"), any());
+        verify(request).setAttribute(eq("productId"), any());
     }
 
     @Test
     public void testDoPostAddToCartSuccess() throws ServletException, IOException {
-        when(request.getPathInfo()).thenReturn("/0");
+        when(request.getParameter("productId")).thenReturn("0");
         when(request.getParameter("quantity")).thenReturn("1");
-        when(request.getContextPath()).thenReturn("http://localhost:8080/phoneshop-servlet-api");
-        when(request.getLocale()).thenReturn(new Locale("en", "GB"));
         servlet.doPost(request, response);
-        verify(response, times(1)).sendRedirect(request.getContextPath() + "/products/0?message=Added to cart successfully");
+        verify(response, times(1)).sendRedirect(request.getRequestURI() + "?message=Added to cart successfully");
     }
 }

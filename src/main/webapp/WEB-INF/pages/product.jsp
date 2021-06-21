@@ -5,21 +5,16 @@
 
 <jsp:useBean id="product" type="com.es.phoneshop.model.product.Product" scope="request"/>
 <tags:master pageTitle="Product Detail">
-  <p>Cart: ${cart}</p>
   <c:if test="${not empty param.message}">
-    <p class="success">
-        ${param.message}
-    </p>
+    <tags:message message="${param.message}" className="success"/>
   </c:if>
   <c:if test="${not empty error}">
-    <p class="error">
-        An error occurred while adding to cart
-    </p>
+    <tags:message message="An error occurred while adding to cart" className="error"/>
   </c:if>
   <p>
       ${product.description}
   </p>
-  <form method="post">
+  <form method="post" action="${pageContext.servletContext.contextPath}/products/${product.id}">
     <table>
       <thead>
       <tr>
@@ -49,6 +44,7 @@
               ${error}
             </p>
           </c:if>
+          <input type="hidden" name="productId" value="${product.id}"/>
         </td>
       </tr>
     </table>

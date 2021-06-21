@@ -8,13 +8,12 @@ import com.es.phoneshop.service.DefaultRecentlyViewedService;
 import com.es.phoneshop.service.RecentlyViewedService;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-public class ProductListPageServlet extends HttpServlet {
+public class ProductListPageServlet extends AddToCartServlet {
     private ProductDao productDao;
     private RecentlyViewedService recentlyViewedService;
 
@@ -36,5 +35,10 @@ public class ProductListPageServlet extends HttpServlet {
         request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewed(request.getSession()));
 
         request.getRequestDispatcher("/WEB-INF/pages/productList.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        super.doPost(request, response);
     }
 }
