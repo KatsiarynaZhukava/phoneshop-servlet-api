@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
 
@@ -31,8 +32,8 @@ public class PriceHistoryPageServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/pages/priceHistory.jsp").forward(request, response);
         } catch (NotFoundException | NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            request.setAttribute("productId", productId.substring(1));
-            request.getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp").forward(request, response);
+            request.setAttribute("message", MessageFormat.format(PRODUCT_NOT_FOUND_BY_ID, productId));
+            request.getRequestDispatcher("/WEB-INF/pages/errorNotFound.jsp").forward(request, response);
         }
     }
 }
