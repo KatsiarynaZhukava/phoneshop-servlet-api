@@ -27,6 +27,5 @@ public class DosFilter implements Filter {
 
     @Override
     public void destroy() {
-
     }
 }

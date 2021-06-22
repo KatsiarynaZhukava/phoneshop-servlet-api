@@ -84,7 +84,4 @@
                 </td>
             </tr>
         </table>
-    <footer>
-        <jsp:include page="recentlyViewed.jsp"/>
-    </footer>
 </tags:master>

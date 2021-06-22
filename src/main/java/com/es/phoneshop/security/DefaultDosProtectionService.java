@@ -24,7 +24,7 @@ public class DefaultDosProtectionService implements DosProtectionService {
         } else {
             Long now = System.currentTimeMillis();
             if (TimeUnit.MILLISECONDS.toMinutes(now - requestsNumberHolder.getStartTime()) < 1) {
-                if (requestsNumberHolder.getCount() < THRESHOLD) {
+                if (requestsNumberHolder.getCount() <= THRESHOLD) {
                     requestsNumberHolder.setCount(requestsNumberHolder.getCount() + 1);
                 } else {
                     return false;

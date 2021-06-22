@@ -18,6 +18,31 @@ public class Order extends Cart {
     private String deliveryAddress;
     private PaymentMethod paymentMethod;
 
+    public Order() {
+    }
+
+    public Order(final Long id,
+                 final String secureId,
+                 final BigDecimal subtotal,
+                 final BigDecimal deliveryCost,
+                 final String firstName,
+                 final String lastName,
+                 final String phoneNumber,
+                 final LocalDate deliveryDate,
+                 final String deliveryAddress,
+                 final PaymentMethod paymentMethod ) {
+        this.id = id;
+        this.secureId = secureId;
+        this.subtotal = subtotal;
+        this.deliveryCost = deliveryCost;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+        this.deliveryDate = deliveryDate;
+        this.deliveryAddress = deliveryAddress;
+        this.paymentMethod = paymentMethod;
+    }
+
     public Long getId() {
         return id;
     }

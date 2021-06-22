@@ -21,14 +21,12 @@ import java.util.Map;
 public class CheckoutPageServlet extends HttpServlet {
     private CartService cartService;
     private OrderService orderService;
-    private RecentlyViewedService recentlyViewedService;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         cartService = DefaultCartService.getInstance();
         orderService = DefaultOrderService.getInstance();
-        recentlyViewedService = DefaultRecentlyViewedService.getInstance();
     }
 
     @Override
@@ -38,7 +36,6 @@ public class CheckoutPageServlet extends HttpServlet {
         if (!cart.getItems().isEmpty()) {
             request.setAttribute("order", orderService.getOrder(cart));
             request.setAttribute("paymentMethods", orderService.getPaymentMethods());
-            request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewed(request.getSession()));
             request.getRequestDispatcher("/WEB-INF/pages/checkout.jsp").forward(request, response);
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -63,7 +60,6 @@ public class CheckoutPageServlet extends HttpServlet {
         } else {
             request.setAttribute("errors", errors);
             request.setAttribute("order", order);
-            request.setAttribute("recentlyViewedProducts", recentlyViewedService.getRecentlyViewed(request.getSession()));
             request.setAttribute("paymentMethods", orderService.getPaymentMethods());
             request.getRequestDispatcher("/WEB-INF/pages/checkout.jsp").forward(request, response);
         }

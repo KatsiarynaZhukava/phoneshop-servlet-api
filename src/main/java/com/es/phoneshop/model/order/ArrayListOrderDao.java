@@ -2,9 +2,9 @@ package com.es.phoneshop.model.order;
 
 import com.es.phoneshop.exception.NotFoundException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static com.es.phoneshop.util.Messages.ORDER_NOT_FOUND_BY_ID;
@@ -14,7 +14,7 @@ public class ArrayListOrderDao implements OrderDao {
     private List<Order> orders;
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private ArrayListOrderDao() {
-        orders = new ArrayList<>();
+        orders = new CopyOnWriteArrayList<>();
     }
 
     private static class InstanceHolder {
@@ -64,6 +64,17 @@ public class ArrayListOrderDao implements OrderDao {
                     throw new NotFoundException(ORDER_NOT_FOUND_BY_ID, order.getId());
                 }
             }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void clear() {
+        lock.writeLock().lock();
+        try {
+            orders.clear();
+            maxId = 0L;
         } finally {
             lock.writeLock().unlock();
         }

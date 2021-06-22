@@ -1,11 +1,17 @@
 package com.es.phoneshop.util;
 
+import com.es.phoneshop.model.order.ArrayListOrderDao;
+import com.es.phoneshop.model.order.Order;
+import com.es.phoneshop.model.order.OrderDao;
+import com.es.phoneshop.model.order.PaymentMethod;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.*;
 
 public class DataProvider {
@@ -28,5 +34,11 @@ public class DataProvider {
             priceHistory.put(LocalDateTime.now(), new BigDecimal(100));
             product.setPriceHistory(priceHistory);
         }
+    }
+
+    public static void setUpOrderDao(ArrayList<String> secureIds) {
+        OrderDao orderDao = ArrayListOrderDao.getInstance();
+        orderDao.save(new Order(null, secureIds.get(0), new BigDecimal(100), new BigDecimal(5), "Katsiaryna", "Zhukava", "7654321", LocalDate.of(2021, Month.JUNE, 26), "Minsk, Masherov av.", PaymentMethod.CREDIT_CARD));
+        orderDao.save(new Order(null, secureIds.get(1), new BigDecimal(200), new BigDecimal(5), "Vasily", "Pupkin", "918-27-36", LocalDate.of(2021, Month.JUNE, 27), "Minsk, Victors' av", PaymentMethod.CASH));
     }
 }
