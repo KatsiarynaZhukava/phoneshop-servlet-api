@@ -10,6 +10,7 @@ import com.es.phoneshop.util.DataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.math.BigDecimal;
@@ -22,9 +23,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrderServiceTest {
+    @Mock
+    private CartItem cartItem;
+
     private final OrderService orderService = DefaultOrderService.getInstance();
 
     @Before
@@ -51,6 +56,16 @@ public class OrderServiceTest {
         assertEquals(subtotal, order.getSubtotal());
         assertEquals(new BigDecimal(5), order.getDeliveryCost());
         assertEquals(subtotal.add(new BigDecimal(5)), order.getTotalCost());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testGetOrderCloneNotSupported() throws CloneNotSupportedException {
+        Cart cart = new Cart();
+        CopyOnWriteArrayList<CartItem> cartItems = new CopyOnWriteArrayList<>();
+        when(cartItem.clone()).thenThrow(CloneNotSupportedException.class);
+        cartItems.add(cartItem);
+        cart.setItems(cartItems);
+        orderService.getOrder(cart);
     }
 
     @Test
