@@ -21,10 +21,7 @@ public class DefaultDosProtectionService implements DosProtectionService {
 
     @Override
     public boolean isAllowed(String ip) {
-        Lock lock = lockMap.get(ip);
-        if (lock == null) {
-            lock = lockMap.computeIfAbsent(ip, value -> new ReentrantLock());
-        }
+        Lock lock = lockMap.computeIfAbsent(ip, value -> new ReentrantLock());
         lock.lock();
         try {
             RequestsNumberHolder requestsNumberHolder = countMap.get(ip);
