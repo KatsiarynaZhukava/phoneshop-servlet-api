@@ -126,4 +126,13 @@ public class CartServiceTest {
         cartService.add(cart, 0L, 1L, httpSession);
         cartService.update(cart, -1L, 2L, httpSession);
     }
+
+    @Test
+    public void testClearCart() {
+        Cart cart = cartService.getCart(httpSession);
+        cartService.clear(cart, httpSession);
+        assertEquals(0L, cart.getItems().size());
+        assertEquals(0L, cart.getTotalQuantity());
+        assertEquals(new BigDecimal(0), cart.getTotalCost());
+    }
 }

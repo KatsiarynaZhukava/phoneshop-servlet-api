@@ -13,6 +13,7 @@ import com.es.phoneshop.util.lock.SessionLockManager;
 import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
@@ -109,6 +110,18 @@ public class DefaultCartService implements CartService {
         lock.lock();
         try {
             cart.getItems().removeIf(cartItem -> cartItem.getProduct().getId().equals(productId));
+            recalculateCart(cart);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void clear(Cart cart, HttpSession session) {
+        Lock lock = sessionLockManager.getSessionLock(session);
+        lock.lock();
+        try {
+            cart.setItems(new CopyOnWriteArrayList<>());
             recalculateCart(cart);
         } finally {
             lock.unlock();

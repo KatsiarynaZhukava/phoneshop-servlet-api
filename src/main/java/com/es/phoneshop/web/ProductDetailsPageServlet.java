@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import static com.es.phoneshop.util.Messages.PRODUCT_NOT_FOUND_BY_ID;
 
@@ -44,8 +45,8 @@ public class ProductDetailsPageServlet extends AddToCartServlet {
             request.getRequestDispatcher("/WEB-INF/pages/product.jsp").forward(request, response);
         } catch (NotFoundException | NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            request.setAttribute("productId", productId);
-            request.getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp").forward(request, response);
+            request.setAttribute("message", MessageFormat.format(PRODUCT_NOT_FOUND_BY_ID, productId));
+            request.getRequestDispatcher("/WEB-INF/pages/errorNotFound.jsp").forward(request, response);
         }
     }
 

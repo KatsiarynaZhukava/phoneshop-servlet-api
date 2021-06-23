@@ -64,8 +64,8 @@ public class ProductDetailsPageServletTest {
     public void testDoGetWithIncorrectId() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/-1");
         servlet.doGet(request, response);
-        verify(request).setAttribute(eq("productId"), any());
-        verify(request).getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp");
+        verify(request).setAttribute(eq("message"), any());
+        verify(request).getRequestDispatcher("/WEB-INF/pages/errorNotFound.jsp");
         verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         verify(requestDispatcher).forward(request, response);
     }
@@ -74,8 +74,8 @@ public class ProductDetailsPageServletTest {
     public void testDoGetWithIdNotANumber() throws ServletException, IOException {
         when(request.getPathInfo()).thenReturn("/aaa");
         servlet.doGet(request, response);
-        verify(request).setAttribute(eq("productId"), any());
-        verify(request).getRequestDispatcher("/WEB-INF/pages/errorProductNotFound.jsp");
+        verify(request).setAttribute(eq("message"), any());
+        verify(request).getRequestDispatcher("/WEB-INF/pages/errorNotFound.jsp");
         verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         verify(requestDispatcher).forward(request, response);
     }
@@ -116,7 +116,8 @@ public class ProductDetailsPageServletTest {
         when(request.getParameter("productId")).thenReturn("aaa");
         servlet.doPost(request, response);
         verify(request).setAttribute(eq("error"), any());
-        verify(request, times(2)).setAttribute(eq("productId"), any());
+        verify(request).setAttribute(eq("productId"), any());
+        verify(request).setAttribute(eq("message"), any());
         verify(response).setStatus(HttpServletResponse.SC_NOT_FOUND);
         verify(requestDispatcher).forward(request, response);
     }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Cart implements Serializable {
-    private final CopyOnWriteArrayList<CartItem> items;
+    private CopyOnWriteArrayList<CartItem> items;
     private long totalQuantity;
     private BigDecimal totalCost;
 
@@ -15,8 +15,12 @@ public class Cart implements Serializable {
         this.items = new CopyOnWriteArrayList<>();
     }
 
-    public List<CartItem> getItems() {
+    public synchronized List<CartItem> getItems() {
         return items;
+    }
+
+    public synchronized void setItems(CopyOnWriteArrayList<CartItem> items) {
+        this.items = items;
     }
 
     public synchronized long getTotalQuantity() {

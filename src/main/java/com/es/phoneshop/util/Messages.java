@@ -2,6 +2,7 @@ package com.es.phoneshop.util;
 
 public final class Messages {
     public static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by id: {0}";
+    public static final String ORDER_NOT_FOUND_BY_ID = "Order not found by id: {0}";
     public static final String PRODUCT_NOT_FOUND_BY_ID_IN_CART = "No product with id {0} found in cart";
     public static final String ID_NOT_A_NUMBER = "Product id is not a number";
     public static final String PRODUCT_OUT_OF_STOCK_WITH_ITEMS_IN_CART = "Not enough stock: your overall request is {0} including {1} already in cart, available {2}";
