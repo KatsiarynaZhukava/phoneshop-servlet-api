@@ -31,6 +31,8 @@ public class CheckoutPageServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+
         HttpSession session = request.getSession();
         Cart cart = cartService.getCart(session);
         if (!cart.getItems().isEmpty()) {
