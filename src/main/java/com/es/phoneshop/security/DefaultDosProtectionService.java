@@ -23,11 +23,7 @@ public class DefaultDosProtectionService implements DosProtectionService {
     public boolean isAllowed(String ip) {
         Lock lock = lockMap.get(ip);
         if (lock == null) {
-            synchronized (this) {
-                if (lock == null) {
-                    lockMap.put(ip, lock = new ReentrantLock());
-                }
-            }
+            lock = lockMap.computeIfAbsent(ip, value -> new ReentrantLock());
         }
         lock.lock();
         try {
