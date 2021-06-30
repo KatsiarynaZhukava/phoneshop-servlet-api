@@ -15,7 +15,8 @@
     <input name="query" value="${param.query}">
     <button>Search</button>
   </form>
-    <table>
+  <a href="${pageContext.request.contextPath}/products/advancedSearch">Advanced Search</a>
+  <table>
       <thead>
         <tr>
           <td>Image</td>

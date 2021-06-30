@@ -31,8 +31,61 @@ public class ArrayListProductDao implements ProductDao {
         lock.readLock().lock();
         try {
             return products.stream()
-                    .filter(product -> id.equals(product.getId()))
-                    .findAny();
+                           .filter(product -> id.equals(product.getId()))
+                           .findAny();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    @Override
+    public List<Product> findProductsAdvanced(Map<SearchFields, String> searchParameters) {
+        String descriptionType = getValue(searchParameters.get(SearchFields.DESCRIPTION_TYPE), "");
+        String description = getValue(searchParameters.get(SearchFields.DESCRIPTION), "");
+        String minPriceString = getValue(searchParameters.get(SearchFields.MIN_PRICE), "");
+        String maxPriceString = getValue(searchParameters.get(SearchFields.MAX_PRICE), "");
+
+        long minPrice;
+        long maxPrice;
+        if (!minPriceString.isEmpty()) {
+            minPrice = Long.parseLong(minPriceString);
+        } else {
+            minPrice = 0;
+        }
+        if (!maxPriceString.isEmpty()) {
+            maxPrice = Long.parseLong(maxPriceString);
+        } else {
+            maxPrice = Long.MAX_VALUE;
+        }
+
+        lock.readLock().lock();
+        try {
+            List<Product> result;
+            if (description == null || description.isEmpty()) {
+                result = products;
+            } else {
+                String[] keywords = description.toLowerCase().split("[ ]+");
+                ToLongFunction<Product> getNumberOfMatches = product ->
+                                                    (int) Arrays.stream(keywords)
+                                                                .filter(product.getDescription().toLowerCase()::contains)
+                                                                .count();
+                if (descriptionType.equals("ANY_WORD")) {
+                    result = products.stream()
+                                     .filter(product -> (getNumberOfMatches.applyAsLong(product)) > 0)
+                                     .sorted(Comparator.comparingLong(getNumberOfMatches).reversed())
+                                     .collect(Collectors.toList());
+                } else {
+                    result = products.stream()
+                                     .filter(product -> (getNumberOfMatches.applyAsLong(product)) == keywords.length)
+                                     .collect(Collectors.toList());
+                }
+                long finalMinPrice = minPrice;
+                long finalMaxPrice = maxPrice;
+                result = result.stream()
+                               .filter(product -> product.getPrice().longValue() >= finalMinPrice && product.getPrice().longValue() <= finalMaxPrice)
+                               .collect(Collectors.toList());
+            }
+            return result;
         } finally {
             lock.readLock().unlock();
         }
@@ -61,20 +114,7 @@ public class ArrayListProductDao implements ProductDao {
                                  .sorted(Comparator.comparingLong(getNumberOfMatches).reversed())
                                  .collect(Collectors.toList());
             }
-            if (sortField != null) {
-                Comparator<Product> comparator = Comparator.comparing(product -> {
-                    if (SortField.DESCRIPTION == sortField) {
-                        return (Comparable) product.getDescription();
-                    } else {
-                        return (Comparable) product.getPrice();
-                    }
-                });
-                comparator = SortOrder.DESC == sortOrder ? comparator.reversed() : comparator;
-                result = result.stream()
-                        .sorted(comparator)
-                        .collect(Collectors.toList());
-            }
-            return result;
+            return sort(result, sortField, sortOrder);
         } finally {
             lock.readLock().unlock();
         }
@@ -105,9 +145,7 @@ public class ArrayListProductDao implements ProductDao {
     public void delete(Long id) {
         lock.writeLock().lock();
         try {
-            products.removeIf(product ->
-                    product.getId().equals(id)
-            );
+            products.removeIf(product -> product.getId().equals(id));
         } finally {
             lock.writeLock().unlock();
         }
@@ -144,5 +182,27 @@ public class ArrayListProductDao implements ProductDao {
         } finally {
             lock.writeLock().unlock();
         }
+    }
+
+    private List<Product> sort(List<Product> products, SortField sortField, SortOrder sortOrder) {
+        if (sortField != null) {
+            Comparator<Product> comparator = Comparator.comparing(product -> {
+                if (SortField.DESCRIPTION == sortField) {
+                    return (Comparable) product.getDescription();
+                } else {
+                    return (Comparable) product.getPrice();
+                }
+            });
+            comparator = SortOrder.DESC == sortOrder ? comparator.reversed() : comparator;
+            return products.stream()
+                    .sorted(comparator)
+                    .collect(Collectors.toList());
+        } else {
+            return products;
+        }
+    }
+
+    private <T> T getValue(T primaryValue, T defaultValue) {
+        return primaryValue == null ? defaultValue : primaryValue;
     }
 }

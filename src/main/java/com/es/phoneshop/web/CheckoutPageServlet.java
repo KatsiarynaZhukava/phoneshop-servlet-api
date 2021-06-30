@@ -53,7 +53,7 @@ public class CheckoutPageServlet extends HttpServlet {
         Order order = orderService.getOrder(cart);
 
         Map<String, String> errors = new HashMap();
-        verifyParameters(request, errors, order);
+        validateParameters(request, errors, order);
 
         if (errors.isEmpty()) {
             orderService.placeOrder(order);
@@ -67,7 +67,7 @@ public class CheckoutPageServlet extends HttpServlet {
         }
     }
 
-    private void verifyParameters(final HttpServletRequest request, final Map<String, String> errors, final Order order) {
+    private void validateParameters(final HttpServletRequest request, final Map<String, String> errors, final Order order) {
         String firstName = request.getParameter("firstName");
         if (!isValidWord(firstName)) {
             errors.put("firstName", "First name must not be empty and must contain letters only");
